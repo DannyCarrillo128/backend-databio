@@ -10,21 +10,31 @@ var ResourceRelationship = require('../models/resourceRelationship');
 // Obtener todos los registros de ResourceRelationship
 // ===============================================================
 app.get('/', (req, res, next) => {
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     ResourceRelationship.find({})
-        .exec((err, resourceRelationships) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error cargando los registros de ResourceRelationship',
-                    errors: err
+        .skip(desde)
+        .limit(50)
+        .exec(
+            (err, resourceRelationships) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando los registros de ResourceRelationship',
+                        errors: err
+                    });
+                }
+
+                ResourceRelationship.countDocuments({}, (err, conteo) => {
+                    res.status(200).json({
+                        ok: true,
+                        resourceRelationships: resourceRelationships,
+                        total: conteo
+                    });
                 });
             }
-
-            res.status(200).json({
-                ok: true,
-                resourceRelationships: resourceRelationships
-            });
-        });
+        );
 });
 
 

@@ -10,7 +10,12 @@ var Occurrence = require('../models/occurrence');
 // Obtener todos los registros de Occurrence
 // ===============================================================
 app.get('/', (req, res, next) => {
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     Occurrence.find({})
+        .skip(desde)
+        .limit(50)
         .exec(
             (err, occurrences) => {
                 if (err) {
@@ -21,9 +26,12 @@ app.get('/', (req, res, next) => {
                     });
                 }
 
-                res.status(200).json({
-                    ok: true,
-                    occurrences: occurrences
+                Occurrence.countDocuments({}, (err, conteo) => {
+                    res.status(200).json({
+                        ok: true,
+                        occurrences: occurrences,
+                        total: conteo
+                    });
                 });
             }
         );

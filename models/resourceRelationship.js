@@ -11,6 +11,6 @@ var resourceRelationshipSchema = new Schema({
     relationshipAccordingTo: { type: String, required: false },
     relationshipEstablishedDate: { type: String, required: false },
     relationshipRemarks: { type: String, required: false }
-});
+}, { collection: 'resourceRelationships' });
 
 module.exports = mongoose.model('ResourceRelationship', resourceRelationshipSchema);

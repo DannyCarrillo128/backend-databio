@@ -10,21 +10,31 @@ var MaterialSample = require('../models/materialSample');
 // Obtener todos los registros de MaterialSample
 // ===============================================================
 app.get('/', (req, res, next) => {
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     MaterialSample.find({})
-        .exec((err, materialSamples) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error cargando los registros de MaterialSample',
-                    errors: err
+        .skip(desde)
+        .limit(50)
+        .exec(
+            (err, materialSamples) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando los registros de MaterialSample',
+                        errors: err
+                    });
+                }
+
+                MaterialSample.countDocuments({}, (err, conteo) => {
+                    res.status(200).json({
+                        ok: true,
+                        materialSamples: materialSamples,
+                        total: conteo
+                    });
                 });
             }
-
-            res.status(200).json({
-                ok: true,
-                materialSamples: materialSamples
-            });
-        });
+        );
 });
 
 

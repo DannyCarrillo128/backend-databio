@@ -22,6 +22,6 @@ var geologicalContextSchema = new Schema({
     formation: { type: String, required: false },
     member: { type: String, required: false },
     bed: { type: String, required: false }
-});
+}, { collection: 'geologicalContexts' });
 
 module.exports = mongoose.model('GeologicalContext', geologicalContextSchema);

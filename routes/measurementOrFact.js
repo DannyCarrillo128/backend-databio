@@ -10,21 +10,31 @@ var MeasurementOrFact = require('../models/measurementOrFact');
 // Obtener todos los registros de MeasurementOrFact
 // ===============================================================
 app.get('/', (req, res, next) => {
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     MeasurementOrFact.find({})
-        .exec((err, measurementOrFacts) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error cargando los registros de MeasurementOrFacts',
-                    errors: err
+        .skip(desde)
+        .limit(50)
+        .exec(
+            (err, measurementOrFacts) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando los registros de MeasurementOrFacts',
+                        errors: err
+                    });
+                }
+
+                MeasurementOrFact.countDocuments({}, (err, conteo) => {
+                    res.status(200).json({
+                        ok: true,
+                        measurementOrFacts: measurementOrFacts,
+                        total: conteo
+                    });
                 });
             }
-
-            res.status(200).json({
-                ok: true,
-                measurementOrFacts: measurementOrFacts
-            });
-        });
+        );
 });
 
 

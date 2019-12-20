@@ -10,21 +10,31 @@ var GeologicalContext = require('../models/geologicalContext');
 // Obtener todos los registros de GeologicalContext
 // ===============================================================
 app.get('/', (req, res, next) => {
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     GeologicalContext.find({})
-        .exec((err, geologicalContexts) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error cargando los registros de GeologicalContext',
-                    errors: err
+        .skip(desde)
+        .limit(50)
+        .exec(
+            (err, geologicalContexts) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando los registros de GeologicalContext',
+                        errors: err
+                    });
+                }
+
+                GeologicalContext.countDocuments({}, (err, conteo) => {
+                    res.status(200).json({
+                        ok: true,
+                        geologicalContexts: geologicalContexts,
+                        total: conteo
+                    });
                 });
             }
-
-            res.status(200).json({
-                ok: true,
-                geologicalContexts: geologicalContexts
-            });
-        });
+        );
 });
 
 

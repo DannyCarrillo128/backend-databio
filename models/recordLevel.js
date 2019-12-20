@@ -23,6 +23,6 @@ var recordLevelSchema = new Schema({
     informationWithheld: { type: String, required: false },
     dataGeneralizations: { type: String, required: false },
     dynamicProperties: { type: String, required: false }
-});
+}, { collection: 'recordLevels' });
 
 module.exports = mongoose.model('RecordLevel', recordLevelSchema);

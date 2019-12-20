@@ -10,21 +10,31 @@ var Event = require('../models/event');
 // Obtener todos los registros de Event
 // ===============================================================
 app.get('/', (req, res, next) => {
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     Event.find({})
-        .exec((err, events) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error cargando los registros de Event',
-                    errors: err
+        .skip(desde)
+        .limit(50)
+        .exec(
+            (err, events) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando los registros de Event',
+                        errors: err
+                    });
+                }
+
+                Event.countDocuments({}, (err, conteo) => {
+                    res.status(200).json({
+                        ok: true,
+                        events: events,
+                        total: conteo
+                    });
                 });
             }
-
-            res.status(200).json({
-                ok: true,
-                events: events
-            });
-        });
+        );
 });
 
 

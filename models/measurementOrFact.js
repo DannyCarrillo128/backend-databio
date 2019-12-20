@@ -13,6 +13,6 @@ var measurementOrFactSchema = new Schema({
     measurementDeterminedDate: { type: String, required: false },
     measurementMethod: { type: String, required: false },
     measurementRemarks: { type: String, required: false }
-});
+}, { collection: 'measurementOrFacts' });
 
 module.exports = mongoose.model('MeasurementOrFact', measurementOrFactSchema);

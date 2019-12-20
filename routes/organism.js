@@ -10,7 +10,12 @@ var Organism = require('../models/organism');
 // Obtener todos los registros de Organism
 // ===============================================================
 app.get('/', (req, res, next) => {
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     Organism.find({})
+        .skip(desde)
+        .limit(50)
         .exec(
             (err, organisms) => {
                 if (err) {
@@ -21,9 +26,12 @@ app.get('/', (req, res, next) => {
                     });
                 }
 
-                res.status(200).json({
-                    ok: true,
-                    organisms: organisms
+                Organism.countDocuments({}, (err, conteo) => {
+                    res.status(200).json({
+                        ok: true,
+                        organisms: organisms,
+                        total: conteo
+                    });
                 });
             }
         );

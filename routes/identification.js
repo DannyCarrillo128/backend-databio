@@ -10,21 +10,31 @@ var Identification = require('../models/identification');
 // Obtener todos los registros de Identification
 // ===============================================================
 app.get('/', (req, res, next) => {
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     Identification.find({})
-        .exec((err, identifications) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error cargando los registros de Identification',
-                    errors: err
+        .skip(desde)
+        .limit(50)
+        .exec(
+            (err, identifications) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando los registros de Identification',
+                        errors: err
+                    });
+                }
+
+                Identification.countDocuments({}, (err, conteo) => {
+                    res.status(200).json({
+                        ok: true,
+                        identifications: identifications,
+                        total: conteo
+                    });
                 });
             }
-
-            res.status(200).json({
-                ok: true,
-                identifications: identifications
-            });
-        });
+        );
 });
 
 

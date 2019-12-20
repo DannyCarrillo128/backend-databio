@@ -5,6 +5,6 @@ var Schema = mongoose.Schema;
 
 var materialSampleSchema = new Schema({
     materialSampleID: { type: String, required: false }
-});
+}, { collection: 'materialSamples' });
 
 module.exports = mongoose.model('MaterialSample', materialSampleSchema);

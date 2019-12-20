@@ -10,21 +10,31 @@ var Taxon = require('../models/taxon');
 // Obtener todos los registros de Taxon
 // ===============================================================
 app.get('/', (req, res, next) => {
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     Taxon.find({})
-        .exec((err, taxons) => {
-            if (err) {
-                return res.status(500).json({
-                    ok: false,
-                    mensaje: 'Error cargando los registros de Taxon',
-                    errors: err
+        .skip(desde)
+        .limit(50)
+        .exec(
+            (err, taxons) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error cargando los registros de Taxon',
+                        errors: err
+                    });
+                }
+
+                Taxon.countDocuments({}, (err, conteo) => {
+                    res.status(200).json({
+                        ok: true,
+                        taxons: taxons,
+                        total: conteo
+                    });
                 });
             }
-
-            res.status(200).json({
-                ok: true,
-                taxons: taxons
-            });
-        });
+        );
 });
 
 
