@@ -6,12 +6,24 @@ var fs = require('fs');
 var app = express();
 
 var Usuario = require('../models/usuario');
+var DarwinCore = require('../models/darwinCore');
 
 // default options
 app.use(fileUpload());
 
-app.put('/usuarios/:id', (req, res, next) => {
+app.put('/:tipo/:id', (req, res, next) => {
+    var tipo = req.params.tipo;
     var id = req.params.id;
+
+    var tiposValidos = ['usuarios', 'darwinCores'];
+
+    if (tiposValidos.indexOf(tipo) < 0) {
+        return res.status(400).json({
+            ok: false,
+            mensaje: 'El tipo ingresado no es válido',
+            errors: { message: 'Los tipos válidos son ' + tiposValidos.join(', ') }
+        });
+    }
 
     if (!req.files) {
         return res.status(400).json({
@@ -40,7 +52,7 @@ app.put('/usuarios/:id', (req, res, next) => {
     // Nombre de archivo personalizado
     var nombreArchivo = `${ id }-${ new Date().getMilliseconds() }.${ extension }`;
 
-    var path = `./uploads/usuarios/${ nombreArchivo }`;
+    var path = `./uploads/${ tipo }/${ nombreArchivo }`;
 
     archivo.mv(path, err => {
         if (err) {
@@ -51,39 +63,69 @@ app.put('/usuarios/:id', (req, res, next) => {
             });
         }
 
-        subirImagen(id, nombreArchivo, res);
+        subirImagen(tipo, id, nombreArchivo, res);
     });
 });
 
 
-function subirImagen(id, nombreArchivo, res) {
-    Usuario.findById(id, (err, usuario) => {
-        if (!usuario) {
-            return res.status(400).json({
-                ok: true,
-                mensaje: 'No existe el Usuario',
-                errors: { message: 'No existe el Usuario' }
-            });
-        }
+function subirImagen(tipo, id, nombreArchivo, res) {
+    if (tipo === 'usuarios') {
+        Usuario.findById(id, (err, usuario) => {
+            if (!usuario) {
+                return res.status(400).json({
+                    ok: true,
+                    mensaje: 'No existe el Usuario',
+                    errors: { message: 'No existe el Usuario' }
+                });
+            }
 
-        var pathViejo = './uploads/usuarios/' + usuario.img;
+            var pathViejo = './uploads/usuarios/' + usuario.img;
 
-        if (fs.existsSync(pathViejo)) {
-            fs.unlinkSync(pathViejo);
-        }
+            if (fs.existsSync(pathViejo)) {
+                fs.unlinkSync(pathViejo);
+            }
 
-        usuario.img = nombreArchivo;
+            usuario.img = nombreArchivo;
 
-        usuario.save((err, usuarioActualizado) => {
-            usuarioActualizado.password = ':D';
+            usuario.save((err, usuarioActualizado) => {
+                usuarioActualizado.password = ':D';
 
-            return res.status(200).json({
-                ok: true,
-                mensaje: 'Imágen de Usuario actualizada',
-                usuario: usuarioActualizado
+                return res.status(200).json({
+                    ok: true,
+                    mensaje: 'Imágen de Usuario actualizada',
+                    usuario: usuarioActualizado
+                });
             });
         });
-    });
+    }
+
+    if (tipo === 'darwinCores') {
+        DarwinCore.findById(id, (err, darwinCore) => {
+            if (!darwinCore) {
+                return res.status(400).json({
+                    ok: true,
+                    mensaje: 'No existe el registro de Darwin Core',
+                    errors: { message: 'No existe el registro de Darwin Core' }
+                });
+            }
+
+            var pathViejo = './uploads/darwinCores/' + darwinCore.associatedMedia;
+
+            if (fs.existsSync(pathViejo)) {
+                fs.unlinkSync(pathViejo);
+            }
+
+            darwinCore.associatedMedia = nombreArchivo;
+
+            darwinCore.save((err, darwinCoreActualizado) => {
+                return res.status(200).json({
+                    ok: true,
+                    mensaje: 'Imagen de ' + darwinCore.catalogNumber + ' actualizada',
+                    darwinCore: darwinCoreActualizado
+                });
+            });
+        });
+    }
 }
 
 module.exports = app;

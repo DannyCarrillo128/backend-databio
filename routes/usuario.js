@@ -15,7 +15,7 @@ app.get('/', (req, res, next) => {
     var desde = req.query.desde || 0;
     desde = Number(desde);
 
-    Usuario.find({}, 'nombre email img role')
+    Usuario.find({}, 'nombre email img role google')
         .skip(desde)
         .limit(5)
         .exec(
@@ -38,6 +38,37 @@ app.get('/', (req, res, next) => {
             });
 });
 
+
+// ===============================================================
+// Obtener Usuario
+// ===============================================================
+app.get('/:id', (req, res) => {
+    var id = req.params.id;
+
+    Usuario.findById(id, 'nombre email img role google')
+        .exec((err, usuario) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al buscar Usuario',
+                    errors: err
+                });
+            }
+
+            if (!usuario) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'El Usuario con el ID ' + id + ' no existe',
+                    errors: { message: 'No existe un Usuario con ese ID' }
+                });
+            }
+
+            res.status(200).json({
+                ok: true,
+                usuario: usuario
+            });
+        });
+});
 
 // ===============================================================
 // Actualizar Usuario
@@ -66,6 +97,10 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         usuario.nombre = body.nombre
         usuario.email = body.email
         usuario.role = body.role
+        usuario.telefono = body.telefono
+        usuario.titulo = body.titulo
+        usuario.interes = body.interes
+        usuario.institucion = body.institucion
 
         usuario.save((err, usuarioGuardado) => {
             if (err) {
@@ -97,7 +132,11 @@ app.post('/', (req, res) => {
         email: body.email,
         password: bcrypt.hashSync(body.password, 10),
         img: body.img,
-        role: body.role
+        role: body.role,
+        telefono: body.telefono,
+        titulo: body.titulo,
+        interes: body.interes,
+        institucion: body.institucion
     });
 
     usuario.save((err, usuarioGuardado) => {

@@ -3,17 +3,7 @@ var express = require('express');
 var app = express();
 
 var Usuario = require('../models/usuario');
-var RecordLevel = require('../models/recordLevel');
-var Occurrence = require('../models/occurrence');
-var Organism = require('../models/organism');
-var MaterialSample = require('../models/materialSample');
-var Event = require('../models/event');
-var Location = require('../models/location');
-var GeologicalContext = require('../models/geologicalContext');
-var Identification = require('../models/identification');
-var Taxon = require('../models/taxon');
-var MeasurementOrFact = require('../models/measurementOrFact');
-var ResourceRelationship = require('../models/resourceRelationship');
+var DarwinCore = require('../models/darwinCore');
 
 //=======================================================================
 // Búsqueda por Colección
@@ -30,48 +20,8 @@ app.get('/coleccion/:tabla/:busqueda', (req, res) => {
             promesa = buscarUsuarios(busqueda, regex);
             break;
 
-        case 'recordLevels':
-            promesa = buscarRecordLevels(busqueda, regex);
-            break;
-
-        case 'occurrences':
-            promesa = buscarOccurrences(busqueda, regex);
-            break;
-
-        case 'organisms':
-            promesa = buscarOrganisms(busqueda, regex);
-            break;
-
-        case 'materialSamples':
-            promesa = buscarMaterialSamples(busqueda, regex);
-            break;
-
-        case 'events':
-            promesa = buscarEvents(busqueda, regex);
-            break;
-
-        case 'locations':
-            promesa = buscarLocations(busqueda, regex);
-            break;
-
-        case 'geologicalContexts':
-            promesa = buscarGeologicalContexts(busqueda, regex);
-            break;
-
-        case 'identifications':
-            promesa = buscarIdentifications(busqueda, regex);
-            break;
-
-        case 'taxons':
-            promesa = buscarTaxons(busqueda, regex);
-            break;
-
-        case 'measurementOrFacts':
-            promesa = buscarMeasurementOrFacts(busqueda, regex);
-            break;
-
-        case 'resourceRelationships':
-            promesa = buscarResourceRelationships(busqueda, regex);
+        case 'darwinCores':
+            promesa = buscarDarwinCores(busqueda, regex);
             break;
 
         default:
@@ -100,33 +50,13 @@ app.get('/todo/:busqueda', (req, res, next) => {
 
     Promise.all([
             buscarUsuarios(busqueda, regex),
-            buscarRecordLevels(busqueda, regex),
-            buscarOccurrences(busqueda, regex),
-            buscarOrganisms(busqueda, regex),
-            buscarMaterialSamples(busqueda, regex),
-            buscarEvents(busqueda, regex),
-            buscarLocations(busqueda, regex),
-            buscarGeologicalContexts(busqueda, regex),
-            buscarIdentifications(busqueda, regex),
-            buscarTaxons(busqueda, regex),
-            buscarMeasurementOrFacts(busqueda, regex),
-            buscarResourceRelationships(busqueda, regex)
+            buscarDarwinCores(busqueda, regex)
         ])
         .then(respuestas => {
             res.status(200).json({
                 ok: true,
                 usuarios: respuestas[0],
-                recordLevels: respuestas[1],
-                occurrences: respuestas[2],
-                organisms: respuestas[3],
-                materialSamples: respuestas[4],
-                events: respuestas[5],
-                locations: respuestas[6],
-                geologicalContexts: respuestas[7],
-                identifications: respuestas[8],
-                taxons: respuestas[9],
-                measurementOrFacts: respuestas[10],
-                resourceRelationships: respuestas[11],
+                darwinCores: respuestas[1]
             });
         });
 });
@@ -151,11 +81,13 @@ function buscarUsuarios(busqueda, regex) {
 }
 
 
-function buscarRecordLevels(busqueda, regex) {
+function buscarDarwinCores(busqueda, regex) {
 
     return new Promise((resolve, reject) => {
-        RecordLevel.find({})
+        DarwinCore.find({})
             .or([
+                { 'registro': regex },
+                // Record-level
                 { 'type': regex },
                 { 'modified': regex },
                 { 'language': regex },
@@ -174,24 +106,8 @@ function buscarRecordLevels(busqueda, regex) {
                 { 'basisOfRecord': regex },
                 { 'informationWithheld': regex },
                 { 'dataGeneralizations': regex },
-                { 'dynamicProperties': regex }
-            ])
-            .exec((err, recordLevels) => {
-                if (err) {
-                    reject('Error al cargar los registros de RecordLevel', err);
-                } else {
-                    resolve(recordLevels);
-                }
-            });
-    });
-}
-
-
-function buscarOccurrences(busqueda, regex) {
-
-    return new Promise((resolve, reject) => {
-        Occurrence.find({})
-            .or([
+                { 'dynamicProperties': regex },
+                // Occurrence
                 { 'occurrenceID': regex },
                 { 'catalogNumber': regex },
                 { 'recordNumber': regex },
@@ -212,62 +128,18 @@ function buscarOccurrences(busqueda, regex) {
                 { 'associatedSequences': regex },
                 { 'associatedTaxa': regex },
                 { 'otherCatalogNumbers': regex },
-                { 'occurrenceRemarks': regex }
-            ])
-            .exec((err, occurrences) => {
-                if (err) {
-                    reject('Error al cargar los registros de Occurrence', err);
-                } else {
-                    resolve(occurrences);
-                }
-            });
-    });
-}
-
-
-function buscarOrganisms(busqueda, regex) {
-
-    return new Promise((resolve, reject) => {
-        Organism.find({})
-            .or([
+                { 'occurrenceRemarks': regex },
+                // Organism
                 { 'organismID': regex },
                 { 'organismName': regex },
                 { 'organismScope': regex },
                 { 'associatedOccurrences': regex },
                 { 'associatedOrganisms': regex },
                 { 'previousIdentifications': regex },
-                { 'organismRemarks': regex }
-            ])
-            .exec((err, organisms) => {
-                if (err) {
-                    reject('Error al cargar los registros de Organisms', err);
-                } else {
-                    resolve(organisms);
-                }
-            });
-    });
-}
-
-
-function buscarMaterialSamples(busqueda, regex) {
-
-    return new Promise((resolve, reject) => {
-        MaterialSample.find({ materialSampleID: regex }, (err, materialSamples) => {
-            if (err) {
-                reject('Error al cargar los registros de MaterialSample', err);
-            } else {
-                resolve(materialSamples);
-            }
-        });
-    });
-}
-
-
-function buscarEvents(busqueda, regex) {
-
-    return new Promise((resolve, reject) => {
-        Event.find({}, 'nombre email role')
-            .or([
+                { 'organismRemarks': regex },
+                // MaterialSample
+                { 'materialSampleID': regex },
+                // Event
                 { 'eventID': regex },
                 { 'parentEventID': regex },
                 { 'fieldNumber': regex },
@@ -285,24 +157,8 @@ function buscarEvents(busqueda, regex) {
                 { 'sampleSizeUnit': regex },
                 { 'samplingEffort': regex },
                 { 'fieldNotes': regex },
-                { 'eventRemarks': regex }
-            ])
-            .exec((err, events) => {
-                if (err) {
-                    reject('Error al cargar los registros de Event', err);
-                } else {
-                    resolve(events);
-                }
-            });
-    });
-}
-
-
-function buscarLocations(busqueda, regex) {
-
-    return new Promise((resolve, reject) => {
-        Location.find({})
-            .or([
+                { 'eventRemarks': regex },
+                // Location
                 { 'locationID': regex },
                 { 'higherGeographyID': regex },
                 { 'higherGeography': regex },
@@ -346,24 +202,8 @@ function buscarLocations(busqueda, regex) {
                 { 'georeferenceProtocol': regex },
                 { 'georeferenceSources': regex },
                 { 'georeferenceVerificationStatus': regex },
-                { 'georeferenceRemarks': regex }
-            ])
-            .exec((err, locations) => {
-                if (err) {
-                    reject('Error al cargar los registros de Location', err);
-                } else {
-                    resolve(locations);
-                }
-            });
-    });
-}
-
-
-function buscarGeologicalContexts(busqueda, regex) {
-
-    return new Promise((resolve, reject) => {
-        Usuario.find({})
-            .or([
+                { 'georeferenceRemarks': regex },
+                // GeologicalContext
                 { 'geologicalContextID': regex },
                 { 'earliestEonOrLowestEonothem': regex },
                 { 'latestEonOrHighestEonothem': regex },
@@ -381,24 +221,8 @@ function buscarGeologicalContexts(busqueda, regex) {
                 { 'group': regex },
                 { 'formation': regex },
                 { 'member': regex },
-                { 'bed': regex }
-            ])
-            .exec((err, usuarios) => {
-                if (err) {
-                    reject('Error al cargar Usuarios', err);
-                } else {
-                    resolve(usuarios);
-                }
-            });
-    });
-}
-
-
-function buscarIdentifications(busqueda, regex) {
-
-    return new Promise((resolve, reject) => {
-        Identification.find({})
-            .or([
+                { 'bed': regex },
+                // Identification
                 { 'identificationID': regex },
                 { 'identificationQualifier': regex },
                 { 'typeStatus': regex },
@@ -406,24 +230,8 @@ function buscarIdentifications(busqueda, regex) {
                 { 'dateIdentified': regex },
                 { 'identificationReferences': regex },
                 { 'identificationVerificationStatus': regex },
-                { 'identificationRemarks': regex }
-            ])
-            .exec((err, identifications) => {
-                if (err) {
-                    reject('Error al cargar los registros de Identification', err);
-                } else {
-                    resolve(identifications);
-                }
-            });
-    });
-}
-
-
-function buscarTaxons(busqueda, regex) {
-
-    return new Promise((resolve, reject) => {
-        Taxon.find({})
-            .or([
+                { 'identificationRemarks': regex },
+                // Taxon
                 { 'taxonID': regex },
                 { 'scientificNameID': regex },
                 { 'acceptedNameUsageID': regex },
@@ -456,24 +264,8 @@ function buscarTaxons(busqueda, regex) {
                 { 'nomenclaturalCode': regex },
                 { 'taxonomicStatus': regex },
                 { 'nomenclaturalStatus': regex },
-                { 'taxonRemarks': regex }
-            ])
-            .exec((err, taxons) => {
-                if (err) {
-                    reject('Error al cargar los registros de Taxon', err);
-                } else {
-                    resolve(taxons);
-                }
-            });
-    });
-}
-
-
-function buscarMeasurementOrFacts(busqueda, regex) {
-
-    return new Promise((resolve, reject) => {
-        MeasurementOrFact.find({})
-            .or([
+                { 'taxonRemarks': regex },
+                // MeasurementOrFact
                 { 'measurementID': regex },
                 { 'measurementType': regex },
                 { 'measurementValue': regex },
@@ -482,24 +274,8 @@ function buscarMeasurementOrFacts(busqueda, regex) {
                 { 'measurementDeterminedBy': regex },
                 { 'measurementDeterminedDate': regex },
                 { 'measurementMethod': regex },
-                { 'measurementRemarks': regex }
-            ])
-            .exec((err, measurementOrFacts) => {
-                if (err) {
-                    reject('Error al cargar los registros de MeasurementOrFact', err);
-                } else {
-                    resolve(measurementOrFacts);
-                }
-            });
-    });
-}
-
-
-function buscarResourceRelationships(busqueda, regex) {
-    return new Promise((resolve, reject) => {
-
-        ResourceRelationship.find({})
-            .or([
+                { 'measurementRemarks': regex },
+                // ResourceRelationship
                 { 'resourceRelationshipID': regex },
                 { 'resourceID': regex },
                 { 'relatedResourceID': regex },
@@ -508,11 +284,11 @@ function buscarResourceRelationships(busqueda, regex) {
                 { 'relationshipEstablishedDate': regex },
                 { 'relationshipRemarks': regex }
             ])
-            .exec((err, resourceRelationships) => {
+            .exec((err, darwinCores) => {
                 if (err) {
-                    reject('Error al cargar los registros de ResourceRelationship', err);
+                    reject('Error al cargar los registros de DarwinCore', err);
                 } else {
-                    resolve(resourceRelationships);
+                    resolve(darwinCores);
                 }
             });
     });

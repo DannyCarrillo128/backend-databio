@@ -20,18 +20,10 @@ app.use(bodyParser.json());
 
 // Importar Rutas
 var appRoutes = require('./routes/app');
-var recordLevelRoutes = require('./routes/recordLevel');
-var occurrenceRoutes = require('./routes/occurrence');
-var organismRoutes = require('./routes/organism');
-var materialSampleRoutes = require('./routes/materialSample');
-var eventRoutes = require('./routes/event');
-var locationRoutes = require('./routes/location');
-var geologicalContextRoutes = require('./routes/geologicalContext');
-var identificationRoutes = require('./routes/identification');
-var taxonRoutes = require('./routes/taxon');
-var measurementOrFactRoutes = require('./routes/measurementOrFact');
-var resourceRelationshipRoutes = require('./routes/resourceRelationship');
+var darwinCoreRoutes = require('./routes/darwinCore');
 var usuarioRoutes = require('./routes/usuario');
+var fotografiaRoutes = require('./routes/fotografia');
+var comentarioRoutes = require('./routes/comentario');
 var loginRoutes = require('./routes/login');
 var busquedaRoutes = require('./routes/busqueda');
 var uploadRoutes = require('./routes/upload');
@@ -49,18 +41,10 @@ app.use(express.static(__dirname + '/'))
 app.use('/uploads', serveIndex(__dirname + '/uploads')); */
 
 // Rutas
-app.use('/recordLevel', recordLevelRoutes);
-app.use('/occurrence', occurrenceRoutes);
-app.use('/organism', organismRoutes);
-app.use('/materialSample', materialSampleRoutes);
-app.use('/event', eventRoutes);
-app.use('/location', locationRoutes);
-app.use('/geologicalContext', geologicalContextRoutes);
-app.use('/identification', identificationRoutes);
-app.use('/taxon', taxonRoutes);
-app.use('/measurementOrFact', measurementOrFactRoutes);
-app.use('/resourceRelationship', resourceRelationshipRoutes);
+app.use('/darwinCore', darwinCoreRoutes);
 app.use('/usuario', usuarioRoutes);
+app.use('/fotografia', fotografiaRoutes);
+app.use('/comentario', comentarioRoutes);
 app.use('/login', loginRoutes);
 app.use('/busqueda', busquedaRoutes);
 app.use('/upload', uploadRoutes);

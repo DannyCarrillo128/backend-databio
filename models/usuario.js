@@ -8,13 +8,22 @@ var rolesValidos = {
     message: '{VALUE} no es un rol permitido'
 };
 
+var intereses = {
+    values: ['Amateur', 'Científico'],
+    message: '{VALUE} no es un tipo de interés'
+};
+
 var usuarioSchema = new Schema({
     nombre: { type: String, required: [true, 'El nombre es un campo requerido'] },
     email: { type: String, unique: true, required: [true, 'El correo es un campo requerido'] },
     password: { type: String, required: [true, 'La contraseña es un campo requerido'] },
     img: { type: String, required: false },
     role: { type: String, required: true, default: 'USER_ROLE', enum: rolesValidos },
-    google: { type: Boolean, defaul: false }
+    google: { type: Boolean, default: false },
+    telefono: { type: Boolean, defailt: false },
+    titulo: { type: String, required: false },
+    interes: { type: String, required: false, enum: intereses },
+    institucion: { type: String, required: false }
 });
 
 usuarioSchema.plugin(uniqueValidator, { message: '{PATH} debe ser único' });
