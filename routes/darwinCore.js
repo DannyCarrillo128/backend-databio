@@ -45,6 +45,7 @@ app.get('/:id', (req, res) => {
     var id = req.params.id;
 
     DarwinCore.findById(id)
+        //.populate('fotografia')
         .exec((err, darwinCore) => {
             if (err) {
                 return res.status(500).json({
@@ -76,7 +77,6 @@ app.get('/:id', (req, res) => {
 app.get('/anterior/:id', (req, res) => {
     var id = req.params.id;
 
-    // DarwinCore.find({ _id: { $lt: id } })
     DarwinCore.findById({ $lt: id })
         .sort({ _id: -1 })
         .limit(1)
@@ -111,7 +111,6 @@ app.get('/anterior/:id', (req, res) => {
 app.get('/siguiente/:id', (req, res) => {
     var id = req.params.id;
 
-    // DarwinCore.find({ _id: { $gt: id } })
     DarwinCore.findById({ $gt: id })
         .sort({ _id: 1 })
         .limit(1)
@@ -314,7 +313,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         darwinCore.scientificNameID = body.scientificNameID;
         darwinCore.acceptedNameUsageID = body.acceptedNameUsageID;
         darwinCore.parentNameUsageID = body.parentNameUsageID;
-        darwinCore.originalNameUsageIDProperty = body.originalNameUsageIDProperty;
+        darwinCore.originalNameUsageID = body.originalNameUsageID;
         darwinCore.nameAccordingToID = body.nameAccordingToID;
         darwinCore.namePublishedInID = body.namePublishedInID;
         darwinCore.taxonConceptID = body.taxonConceptID;
@@ -361,6 +360,8 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         darwinCore.relationshipAccordingTo = body.relationshipAccordingTo;
         darwinCore.relationshipEstablishedDate = body.relationshipEstablishedDate;
         darwinCore.relationshipRemarks = body.relationshipRemarks;
+        // Fotografía
+        darwinCore.fotografia = body.fotografia;
 
         darwinCore.save((err, darwinCoreGuardado) => {
             if (err) {
@@ -536,7 +537,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         scientificNameID: body.scientificNameID,
         acceptedNameUsageID: body.acceptedNameUsageID,
         parentNameUsageID: body.parentNameUsageID,
-        originalNameUsageIDProperty: body.originalNameUsageIDProperty,
+        originalNameUsageID: body.originalNameUsageID,
         nameAccordingToID: body.nameAccordingToID,
         namePublishedInID: body.namePublishedInID,
         taxonConceptID: body.taxonConceptID,
@@ -582,7 +583,9 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         relationshipOfResource: body.relationshipOfResource,
         relationshipAccordingTo: body.relationshipAccordingTo,
         relationshipEstablishedDate: body.relationshipEstablishedDate,
-        relationshipRemarks: body.relationshipRemarks
+        relationshipRemarks: body.relationshipRemarks,
+        // Fotografía
+        fotografia: body.fotografia
     });
 
     darwinCore.save((err, darwinCoreGuardado) => {

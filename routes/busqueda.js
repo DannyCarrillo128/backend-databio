@@ -3,6 +3,8 @@ var express = require('express');
 var app = express();
 
 var Usuario = require('../models/usuario');
+var Fotografia = require('../models/fotografia');
+var Comentario = require('../models/comentario');
 var DarwinCore = require('../models/darwinCore');
 
 //=======================================================================
@@ -18,6 +20,14 @@ app.get('/coleccion/:tabla/:busqueda', (req, res) => {
     switch (tabla) {
         case 'usuarios':
             promesa = buscarUsuarios(busqueda, regex);
+            break;
+
+        case 'fotografias':
+            promesa = buscarFotografias(busqueda, regex);
+            break;
+
+        case 'comentarios':
+            promesa = buscarComentarios(busqueda, regex);
             break;
 
         case 'darwinCores':
@@ -75,6 +85,48 @@ function buscarUsuarios(busqueda, regex) {
                     reject('Error al cargar Usuarios', err);
                 } else {
                     resolve(usuarios);
+                }
+            });
+    });
+}
+
+
+function buscarFotografias(busqueda, regex) {
+
+    return new Promise((resolve, reject) => {
+        Fotografia.find({})
+            .or([
+                { 'camara': regex },
+                { 'distanciaFocal': regex },
+                { 'tiempoDeExposicion': regex },
+                { 'iso': regex },
+                { 'flash': regex }
+            ])
+            .exec((err, fotografias) => {
+                if (err) {
+                    reject('Error al cargar Fotografías', err);
+                } else {
+                    resolve(fotografias);
+                }
+            });
+    });
+}
+
+
+function buscarComentarios(busqueda, regex) {
+
+    return new Promise((resolve, reject) => {
+        Comentario.find({})
+            .or([
+                { 'texto': regex },
+                { 'fecha': regex },
+                { 'puntuacion': regex }
+            ])
+            .exec((err, comentarios) => {
+                if (err) {
+                    reject('Error al cargar Comentarios', err);
+                } else {
+                    resolve(comentarios);
                 }
             });
     });
@@ -236,7 +288,7 @@ function buscarDarwinCores(busqueda, regex) {
                 { 'scientificNameID': regex },
                 { 'acceptedNameUsageID': regex },
                 { 'parentNameUsageID': regex },
-                { 'originalNameUsageIDProperty': regex },
+                { 'originalNameUsageID': regex },
                 { 'nameAccordingToID': regex },
                 { 'namePublishedInID': regex },
                 { 'taxonConceptID': regex },

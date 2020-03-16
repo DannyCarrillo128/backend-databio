@@ -154,7 +154,7 @@ var darwinCoreSchema = new Schema({
     scientificNameID: { type: String, required: false, default: 'Sin especificar' },
     acceptedNameUsageID: { type: String, required: false, default: 'Sin especificar' },
     parentNameUsageID: { type: String, required: false, default: 'Sin especificar' },
-    originalNameUsageIDProperty: { type: String, required: false, default: 'Sin especificar' },
+    originalNameUsageID: { type: String, required: false, default: 'Sin especificar' },
     nameAccordingToID: { type: String, required: false, default: 'Sin especificar' },
     namePublishedInID: { type: String, required: false, default: 'Sin especificar' },
     taxonConceptID: { type: String, required: false, default: 'Sin especificar' },
@@ -200,7 +200,9 @@ var darwinCoreSchema = new Schema({
     relationshipOfResource: { type: String, required: false, default: 'Sin especificar' },
     relationshipAccordingTo: { type: String, required: false, default: 'Sin especificar' },
     relationshipEstablishedDate: { type: String, required: false, default: 'Sin especificar' },
-    relationshipRemarks: { type: String, required: false, default: 'Sin especificar' }
+    relationshipRemarks: { type: String, required: false, default: 'Sin especificar' },
+    // Fotografía
+    fotografia: { type: Schema.Types.ObjectId, ref: 'Fotografia' }
 }, { collection: 'darwinCores' });
 
 module.exports = mongoose.model('DarwinCore', darwinCoreSchema);
