@@ -10,4 +10,4 @@ var comentarioSchema = new Schema({
     puntuacion: { type: String, required: false }
 });
 
-module.exports = mongoose.model('Cometario', comentarioSchema);
+module.exports = mongoose.model('Comentario', comentarioSchema);

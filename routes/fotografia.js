@@ -17,6 +17,10 @@ app.get('/', (req, res, next) => {
     Fotografia.find({})
         .skip(desde)
         .limit(5)
+        .populate({
+            path: 'comentarios',
+            populate: { path: 'autor' }
+        })
         .exec(
             (err, fotografias) => {
                 if (err) {
@@ -45,6 +49,10 @@ app.get('/:id', (req, res) => {
     var id = req.params.id;
 
     Fotografia.findById(id)
+        .populate({
+            path: 'comentarios',
+            populate: { path: 'autor' }
+        })
         .exec((err, fotografia) => {
             if (err) {
                 return res.status(500).json({
@@ -94,7 +102,6 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
             });
         }
 
-        fotografia.img = body.img;
         fotografia.camara = body.camara;
         fotografia.distanciaFocal = body.distanciaFocal;
         fotografia.tiempoDeExposicion = body.tiempoDeExposicion;
@@ -111,10 +118,17 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
                 });
             }
 
-            res.status(200).json({
-                ok: true,
-                fotografia: fotografiaGuardada
-            });
+            fotografiaGuardada.populate({
+                    path: 'comentarios',
+                    populate: { path: 'autor' }
+                },
+                function(err, fotografiaGuardada) {
+                    res.status(200).json({
+                        ok: true,
+                        fotografia: fotografiaGuardada
+                    });
+                }
+            );
         });
     });
 });
@@ -126,7 +140,6 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
 app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     var body = req.body;
     var fotografia = new Fotografia({
-        img: body.img,
         camara: body.camara,
         distanciaFocal: body.distanciaFocal,
         tiempoDeExposicion: body.tiempoDeExposicion,
@@ -144,10 +157,17 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
             });
         }
 
-        res.status(201).json({
-            ok: true,
-            fotografia: fotografiaGuardada
-        });
+        fotografiaGuardada.populate({
+                path: 'comentarios',
+                populate: { path: 'autor' }
+            },
+            function(err, fotografiaGuardada) {
+                res.status(200).json({
+                    ok: true,
+                    fotografia: fotografiaGuardada
+                });
+            }
+        );
     });
 });
 
@@ -181,5 +201,37 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
         });
     });
 });
+
+
+// ===============================================================
+// Borrar un Comentario
+// ===============================================================
+app.put('/:id/:comentario', mdAutenticacion.verificaToken, (req, res) => {
+    var id = req.params.id;
+    var comentario = req.params.comentario;
+
+    Fotografia.findOneAndUpdate({ _id: id }, { $pull: { comentarios: comentario } }, { new: true },
+        (err, fotografiaActualizada) => {
+            if (err) {
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error al borrar la Fotografía',
+                    errors: err
+                });
+            }
+
+            fotografiaActualizada.populate({
+                    path: 'comentarios',
+                    populate: { path: 'autor' }
+                },
+                function(err, fotografiaActualizada) {
+                    res.status(200).json({
+                        ok: true,
+                        fotografia: fotografiaActualizada
+                    });
+                });
+        });
+});
+
 
 module.exports = app;

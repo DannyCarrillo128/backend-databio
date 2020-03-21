@@ -16,6 +16,7 @@ app.get('/', (req, res, next) => {
     Comentario.find({})
         .skip(desde)
         .limit(50)
+        .populate('autor')
         .exec(
             (err, comentarios) => {
                 if (err) {
@@ -45,6 +46,7 @@ app.get('/:id', (req, res) => {
     var id = req.params.id;
 
     Comentario.findById(id)
+        .populate('autor')
         .exec((err, comentario) => {
             if (err) {
                 return res.status(500).json({
