@@ -50,14 +50,11 @@ app.post('/uploads/csv', (req, res) => {
                 const process = spawn('python', ['./preprocesamiento/pre.py', `./uploads/csv/${EDFile.name}`])
 
                 process.stdout.on('data', data => {
-                    console.log(data.toString());
-                });
-
-                let url = "mongodb://localhost:27017/databioDB";
-                let stream = fs.createReadStream(`./uploads/csv/${EDFile.name}`);
+                    let url = "mongodb://localhost:27017/databioDB";
+                let stream = fs.createReadStream('./preprocesamiento/data.csv');
                 let csvData = [];
                 let csvStream = fastcsv
-                    .parse() 
+                    .parse()
                     .on("data", function(data) {
                         csvData.push({
                             type: data[0],
@@ -282,6 +279,8 @@ app.post('/uploads/csv', (req, res) => {
                     });
 
                 stream.pipe(csvStream);
+                });
+                
             }
 
 
