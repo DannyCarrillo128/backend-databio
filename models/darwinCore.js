@@ -1,10 +1,10 @@
 var mongoose = require('mongoose');
-var uniqueValidator = require('mongoose-unique-validator');
+var AutoIncrement = require('mongoose-sequence')(mongoose);
 
 var Schema = mongoose.Schema;
 
 var darwinCoreSchema = new Schema({
-    registro: { type: String, required: false },
+    registro: { type: Number },
     // Record-Level
     type: { type: String, required: false, default: 'Sin especificar' },
     modified: { type: String, required: false, default: 'Sin especificar' },
@@ -202,7 +202,10 @@ var darwinCoreSchema = new Schema({
     relationshipEstablishedDate: { type: String, required: false, default: 'Sin especificar' },
     relationshipRemarks: { type: String, required: false, default: 'Sin especificar' },
     // Fotografía
+    img: { type: String, required: false },
     fotografia: { type: Schema.Types.ObjectId, ref: 'Fotografia' }
 }, { collection: 'darwinCores' });
+
+darwinCoreSchema.plugin(AutoIncrement, { inc_field: 'registro', start_seq: 4183 });
 
 module.exports = mongoose.model('DarwinCore', darwinCoreSchema);

@@ -109,18 +109,18 @@ function subirImagen(tipo, id, nombreArchivo, res) {
                 });
             }
 
-            var pathViejo = './uploads/darwinCores/' + darwinCore.associatedMedia;
+            var pathViejo = './uploads/darwinCores/' + darwinCore.img;
 
             if (fs.existsSync(pathViejo)) {
                 fs.unlinkSync(pathViejo);
             }
 
-            darwinCore.associatedMedia = nombreArchivo;
+            darwinCore.img = nombreArchivo;
 
             darwinCore.save((err, darwinCoreActualizado) => {
                 return res.status(200).json({
                     ok: true,
-                    mensaje: 'Imagen de ' + darwinCore.catalogNumber + ' actualizada',
+                    mensaje: 'Imagen de Darwin Core Actualizada',
                     darwinCore: darwinCoreActualizado
                 });
             });

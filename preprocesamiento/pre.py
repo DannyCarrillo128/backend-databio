@@ -18,4 +18,4 @@ sinNulos = df.fillna('Sin especificar')
 #crea un dataset con todos los campos nulos reemplazados
 sinNulos.drop(df.columns[[0]], axis='columns')
 inciva = sinNulos.to_csv(r'./preprocesamiento/data.csv', index=False)
-#print(inciva) 
+#print(inciva)

@@ -293,9 +293,7 @@ app.post('/uploads/csv', (req, res) => {
             }
 
             /* else {
-
                 const process = spawn('python', ['./preprocesamiento/pre.py', `./uploads/csv/${EDFile.name}`])
-
                 process.stdout.on('data', data => {
                     let url = "mongodb://localhost:27017/databioDB";
                     let stream = fs.createReadStream('./preprocesamiento/data.csv');
@@ -504,30 +502,24 @@ app.post('/uploads/csv', (req, res) => {
                         .on("end", function() {
                             // remove the first line: header
                             csvData.shift();
-
                             console.log(csvData);
-
                             mongodb.connect(
                                 url, { useNewUrlParser: true, useUnifiedTopology: true },
                                 (err, client) => {
                                     if (err) throw err;
-
                                     client
                                         .db("databioDB")
                                         .collection("darwinCores")
                                         .insertMany(csvData, (err, res) => {
                                             if (err) throw err;
-
                                             console.log(`Inserted: ${res.insertedCount} rows`);
                                             client.close();
                                         });
                                 }
                             );
                         });
-
                     stream.pipe(csvStream);
                 });
-
             } */
 
 
