@@ -15,7 +15,7 @@ app.get('/', (req, res, next) => {
     var desde = req.query.desde || 0;
     desde = Number(desde);
 
-    Usuario.find({}, 'nombre email img role google')
+    Usuario.find({}, 'nombre email img role google telefono ocupacion interes institucion')
         .skip(desde)
         .limit(5)
         .exec(
@@ -45,7 +45,7 @@ app.get('/', (req, res, next) => {
 app.get('/:id', (req, res) => {
     var id = req.params.id;
 
-    Usuario.findById(id, 'nombre email img role google')
+    Usuario.findById(id, 'nombre email img role google telefono ocupacion interes institucion')
         .exec((err, usuario) => {
             if (err) {
                 return res.status(500).json({
@@ -73,7 +73,7 @@ app.get('/:id', (req, res) => {
 // ===============================================================
 // Actualizar Usuario
 // ===============================================================
-app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.put('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaRolUsuario], (req, res) => {
     var id = req.params.id;
     var body = req.body;
 
@@ -98,7 +98,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         usuario.email = body.email
         usuario.role = body.role
         usuario.telefono = body.telefono
-        usuario.titulo = body.titulo
+        usuario.ocupacion = body.ocupacion
         usuario.interes = body.interes
         usuario.institucion = body.institucion
 
@@ -134,7 +134,7 @@ app.post('/', (req, res) => {
         img: body.img,
         role: body.role,
         telefono: body.telefono,
-        titulo: body.titulo,
+        ocupacion: body.ocupacion,
         interes: body.interes,
         institucion: body.institucion
     });
@@ -160,7 +160,7 @@ app.post('/', (req, res) => {
 // ===============================================================
 // Borrar Usuario
 // ===============================================================
-app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
+app.delete('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaRol], (req, res) => {
     var id = req.params.id;
 
     Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {

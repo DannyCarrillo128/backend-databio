@@ -20,3 +20,42 @@ exports.verificaToken = function(req, res, next) {
         next();
     });
 };
+
+
+// ===============================================================
+// Verificar Rol
+// ===============================================================
+exports.verificaRol = function(req, res, next) {
+    var usuario = req.usuario;
+
+    if (usuario.role === 'ADMIN_ROLE') {
+        next();
+        return;
+    } else {
+        return res.status(401).json({
+            ok: false,
+            mensaje: 'Permiso denegado',
+            errors: { message: 'Permiso denegado' }
+        });
+    }
+};
+
+
+// ===============================================================
+// Verificar Rol o Mismo usuario
+// ===============================================================
+exports.verificaRolUsuario = function(req, res, next) {
+    var usuario = req.usuario;
+    var id = req.params.id;
+
+    if (usuario.role === 'ADMIN_ROLE' || usuario._id === id) {
+        next();
+        return;
+    } else {
+        return res.status(401).json({
+            ok: false,
+            mensaje: 'Permiso denegado',
+            errors: { message: 'Permiso denegado' }
+        });
+    }
+};

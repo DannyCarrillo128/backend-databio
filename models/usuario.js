@@ -9,7 +9,7 @@ var rolesValidos = {
 };
 
 var intereses = {
-    values: ['Amateur', 'Científico'],
+    values: ['Amateur', 'Académico', 'Científico'],
     message: '{VALUE} no es un tipo de interés'
 };
 
@@ -20,8 +20,8 @@ var usuarioSchema = new Schema({
     img: { type: String, required: false },
     role: { type: String, required: true, default: 'USER_ROLE', enum: rolesValidos },
     google: { type: Boolean, default: false },
-    telefono: { type: Boolean, defailt: false },
-    titulo: { type: String, required: false },
+    telefono: { type: String, unique: true, required: false },
+    ocupacion: { type: String, required: false },
     interes: { type: String, required: false, enum: intereses },
     institucion: { type: String, required: false }
 });

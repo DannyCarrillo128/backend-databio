@@ -52,7 +52,8 @@ app.post('/', (req, res) => {
             ok: true,
             usuario: usuarioDB,
             token: token,
-            id: usuarioDB._id
+            id: usuarioDB._id,
+            menu: obtenerMenu(usuarioDB.role)
         });
     });
 });
@@ -113,7 +114,8 @@ app.post('/google', async(req, res) => {
                     ok: true,
                     usuario: usuarioDB,
                     token: token,
-                    id: usuarioDB._id
+                    id: usuarioDB._id,
+                    menu: obtenerMenu(usuarioDB.role)
                 });
             }
         } else {
@@ -127,7 +129,7 @@ app.post('/google', async(req, res) => {
 
             usuario.save((err, usuarioDB) => {
                 if (err) {
-                    return res.status(400).json({
+                    return res.status(500).json({
                         ok: false,
                         mensaje: 'Error al crear Usuario',
                         errors: err
@@ -140,11 +142,33 @@ app.post('/google', async(req, res) => {
                     ok: true,
                     usuario: usuarioDB,
                     token: token,
-                    id: usuarioDB._id
+                    id: usuarioDB._id,
+                    menu: obtenerMenu(usuarioDB.role)
                 });
             });
         }
     });
 });
+
+
+function obtenerMenu(role) {
+    var menu = [{
+        titulo: 'Registros',
+        icono: 'mdi mdi-leaf',
+        submenu: [
+            // { titulo: 'Usuarios', url: '/usuarios' },
+            { titulo: 'Darwin Core', url: '/darwinCore' },
+            { titulo: 'Galería', url: '/gallery2' }
+        ]
+    }];
+
+    if (role === 'ADMIN_ROLE') {
+        menu[0].titulo = 'Administrador';
+        menu[0].icono = 'mdi mdi-account-settings-variant';
+        menu[0].submenu.unshift({ titulo: 'Usuarios', url: '/usuarios' });
+    }
+
+    return menu;
+}
 
 module.exports = app;
