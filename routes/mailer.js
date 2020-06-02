@@ -25,7 +25,7 @@ app.post('/solicitud', (req, res) => {
 
     transporter.sendMail({
         from: 'dannycarrillo128@gmail.com',
-        to: "danny.carrillo@correounivalle.edu.co",
+        to: req.body.admins,
         subject: 'Nueva Solicitud de Acceso',
         html: `
         <div style="background-color: #f4f6f9; padding: 25px;">
@@ -85,8 +85,8 @@ app.post('/confirmacion', (req, res) => {
         port: 587,
         secure: false,
         auth: {
-            user: 'dannycarrillo128@gmail.com',
-            pass: 'ochotrigramas'
+            user: 'email',
+            pass: 'password'
         },
         tls: {
             rejectUnauthorized: false
