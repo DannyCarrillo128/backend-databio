@@ -103,7 +103,6 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         }
 
         fotografia.camara = body.camara;
-        fotografia.apertura = body.apertura;
         fotografia.distanciaFocal = body.distanciaFocal;
         fotografia.tiempoDeExposicion = body.tiempoDeExposicion;
         fotografia.iso = body.iso;
@@ -142,7 +141,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     var body = req.body;
     var fotografia = new Fotografia({
         camara: body.camara,
-        apertura: body.apertura,
         distanciaFocal: body.distanciaFocal,
         tiempoDeExposicion: body.tiempoDeExposicion,
         iso: body.iso,

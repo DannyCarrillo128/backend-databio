@@ -45,14 +45,6 @@ app.post('/', (req, res) => {
             });
         }
 
-        if (usuarioDB.estado === 'No verificado') {
-            return res.status(401).json({
-                ok: false,
-                mensaje: 'Acceso restringido',
-                errors: err
-            });
-        }
-
         usuarioDB.password = ':D';
         var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14440 }); // Token válido por 4 horas
 
@@ -115,14 +107,6 @@ app.post('/google', async(req, res) => {
                     ok: false,
                     mensaje: 'Se debe utilizar la autenticación normal'
                 });
-            }
-
-            if (usuarioDB.estado === 'No verificado') {
-                return res.status(401).json({
-                    ok: false,
-                    mensaje: 'Acceso restringido',
-                    errors: err
-                });
             } else {
                 var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 4 horas
 
@@ -142,11 +126,25 @@ app.post('/google', async(req, res) => {
             usuario.password = ':D';
             usuario.img = googleUser.img;
             usuario.google = true;
-            usuario.estado = 'No verificado';
 
-            return res.status(200).json({
-                ok: true,
-                usuario: usuario
+            usuario.save((err, usuarioDB) => {
+                if (err) {
+                    return res.status(500).json({
+                        ok: false,
+                        mensaje: 'Error al crear Usuario',
+                        errors: err
+                    });
+                }
+
+                var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 4 horas
+
+                return res.status(200).json({
+                    ok: true,
+                    usuario: usuarioDB,
+                    token: token,
+                    id: usuarioDB._id,
+                    menu: obtenerMenu(usuarioDB.role)
+                });
             });
         }
     });
@@ -158,6 +156,7 @@ function obtenerMenu(role) {
         titulo: 'Registros',
         icono: 'mdi mdi-leaf',
         submenu: [
+            // { titulo: 'Usuarios', url: '/usuarios' },
             { titulo: 'Darwin Core', url: '/darwinCore' },
             { titulo: 'Galería', url: '/gallery2' }
         ]

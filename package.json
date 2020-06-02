@@ -23,7 +23,6 @@
         "mongoose-sequence": "^5.2.2",
         "mongoose-unique-validator": "^2.0.3",
         "multer": "^1.4.2",
-        "nodemailer": "^6.4.6",
         "pandas": "0.0.3",
         "python-shell": "^1.0.8",
         "serve-index": "^1.9.1"

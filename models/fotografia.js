@@ -4,7 +4,6 @@ var Schema = mongoose.Schema;
 
 var FotografiaSchema = new Schema({
     camara: { type: String, required: false },
-    apertura: { type: String, required: false },
     distanciaFocal: { type: String, required: false },
     tiempoDeExposicion: { type: String, required: false },
     iso: { type: String, required: false },
