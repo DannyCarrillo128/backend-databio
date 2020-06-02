@@ -75,10 +75,12 @@ app.get('/todo/:busqueda', (req, res, next) => {
 function buscarUsuarios(busqueda, regex) {
 
     return new Promise((resolve, reject) => {
-        Usuario.find({}, 'nombre email role')
+        Usuario.find({}, 'nombre email img role telefono ocupacion interes institucion estado solicitud')
             .or([
                 { 'nombre': regex },
-                { 'email': regex }
+                { 'email': regex },
+                { 'role': regex },
+                { 'estado': regex }
             ])
             .exec((err, usuarios) => {
                 if (err) {
@@ -133,7 +135,32 @@ function buscarComentarios(busqueda, regex) {
 }
 
 
+
 function buscarDarwinCores(busqueda, regex) {
+
+    return new Promise((resolve, reject) => {
+        DarwinCore.find({})
+            .or([
+                // Occurrence
+                { 'catalogNumber': regex },
+                // Taxon
+                { 'family': regex },
+                { 'genus': regex },
+                { 'subgenus': regex },
+                { 'infraspecificEpithet': regex },
+                { 'vernacularName': regex },
+            ])
+            .exec((err, darwinCores) => {
+                if (err) {
+                    reject('Error al cargar los registros de DarwinCore', err);
+                } else {
+                    resolve(darwinCores);
+                }
+            });
+    });
+}
+
+/* function buscarDarwinCores(busqueda, regex) {
 
     return new Promise((resolve, reject) => {
         DarwinCore.find({})
@@ -345,5 +372,5 @@ function buscarDarwinCores(busqueda, regex) {
             });
     });
 }
-
+ */
 module.exports = app;

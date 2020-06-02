@@ -13,6 +13,11 @@ var intereses = {
     message: '{VALUE} no es un tipo de interés'
 };
 
+var estados = {
+    values: ['No verificado', 'Verificado'],
+    message: '{VALUE} no es un estado'
+}
+
 var usuarioSchema = new Schema({
     nombre: { type: String, required: [true, 'El nombre es un campo requerido'] },
     email: { type: String, unique: true, required: [true, 'El correo es un campo requerido'] },
@@ -23,7 +28,9 @@ var usuarioSchema = new Schema({
     telefono: { type: String, unique: true, required: false },
     ocupacion: { type: String, required: false },
     interes: { type: String, required: false, enum: intereses },
-    institucion: { type: String, required: false }
+    institucion: { type: String, required: false },
+    estado: { type: String, default: 'No verificado', enum: estados },
+    solicitud: { type: String, require: false }
 });
 
 usuarioSchema.plugin(uniqueValidator, { message: '{PATH} debe ser único' });

@@ -11,13 +11,12 @@ var Usuario = require('../models/usuario');
 // Obtener todos los Usuarios
 // ===============================================================
 app.get('/', (req, res, next) => {
-
     var desde = req.query.desde || 0;
     desde = Number(desde);
 
-    Usuario.find({}, 'nombre email img role google telefono ocupacion interes institucion')
+    Usuario.find({}, 'nombre email img role google telefono ocupacion interes institucion estado solicitud')
         .skip(desde)
-        .limit(5)
+        .limit(50)
         .exec(
             (err, usuarios) => {
                 if (err) {
@@ -45,7 +44,7 @@ app.get('/', (req, res, next) => {
 app.get('/:id', (req, res) => {
     var id = req.params.id;
 
-    Usuario.findById(id, 'nombre email img role google telefono ocupacion interes institucion')
+    Usuario.findById(id, 'nombre email img role google telefono ocupacion interes institucion estado solicitud')
         .exec((err, usuario) => {
             if (err) {
                 return res.status(500).json({
@@ -101,6 +100,8 @@ app.put('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaRolUsuar
         usuario.ocupacion = body.ocupacion
         usuario.interes = body.interes
         usuario.institucion = body.institucion
+        usuario.estado = body.estado
+        usuario.solicitud = body.solicitud
 
         usuario.save((err, usuarioGuardado) => {
             if (err) {
@@ -133,10 +134,12 @@ app.post('/', (req, res) => {
         password: bcrypt.hashSync(body.password, 10),
         img: body.img,
         role: body.role,
+        google: body.google,
         telefono: body.telefono,
         ocupacion: body.ocupacion,
         interes: body.interes,
-        institucion: body.institucion
+        institucion: body.institucion,
+        solicitud: body.solicitud
     });
 
     usuario.save((err, usuarioGuardado) => {
@@ -186,6 +189,5 @@ app.delete('/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaRol],
         });
     });
 });
-
 
 module.exports = app;
