@@ -15,8 +15,8 @@ app.post('/solicitud', (req, res) => {
         port: 587,
         secure: false,
         auth: {
-            user: 'email',
-            pass: 'password'
+            user: 'databioapp@gmail.com',
+            pass: 'databioapp106'
         },
         tls: {
             rejectUnauthorized: false
@@ -24,7 +24,7 @@ app.post('/solicitud', (req, res) => {
     });
 
     transporter.sendMail({
-        from: 'email',
+        from: 'Databio',
         to: req.body.admins,
         subject: 'Nueva Solicitud de Acceso',
         html: `
@@ -85,8 +85,8 @@ app.post('/confirmacion', (req, res) => {
         port: 587,
         secure: false,
         auth: {
-            user: 'email',
-            pass: 'password'
+            user: 'databioapp@gmail.com',
+            pass: 'databioapp106'
         },
         tls: {
             rejectUnauthorized: false
@@ -94,7 +94,7 @@ app.post('/confirmacion', (req, res) => {
     });
 
     transporter.sendMail({
-        from: 'email',
+        from: 'Databio',
         to: req.body.email,
         subject: '¡Bienvenido a Databio!',
         html: `
