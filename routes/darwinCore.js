@@ -1158,4 +1158,24 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
     });
 });
 
+
+app.get('/distinct/:field', (req, res) => {
+    var field = req.params.field;
+
+    DarwinCore.distinct(field, (err, resp) => {
+        if (err) {
+            return res.status(500).json({
+                ok: true,
+                mensaje: 'Error al realizar la operación',
+                errors: err
+            });
+        }
+
+        res.status(200).json({
+            ok: true,
+            respuesta: resp
+        });
+    });
+});
+
 module.exports = app;

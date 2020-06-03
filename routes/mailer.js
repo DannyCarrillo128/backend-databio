@@ -24,7 +24,7 @@ app.post('/solicitud', (req, res) => {
     });
 
     transporter.sendMail({
-        from: 'Databio',
+        from: 'databioapp@gmail.com',
         to: req.body.admins,
         subject: 'Nueva Solicitud de Acceso',
         html: `
@@ -94,7 +94,7 @@ app.post('/confirmacion', (req, res) => {
     });
 
     transporter.sendMail({
-        from: 'Databio',
+        from: 'databioapp@gmail.com',
         to: req.body.email,
         subject: '¡Bienvenido a Databio!',
         html: `
