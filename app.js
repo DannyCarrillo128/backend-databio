@@ -24,15 +24,17 @@ var darwinCoreRoutes = require('./routes/darwinCore');
 var usuarioRoutes = require('./routes/usuario');
 var fotografiaRoutes = require('./routes/fotografia');
 var comentarioRoutes = require('./routes/comentario');
+var puntuacionRoutes = require('./routes/puntuacion');
 var metadatoRoutes = require('./routes/metadato');
 var loginRoutes = require('./routes/login');
 var busquedaRoutes = require('./routes/busqueda');
 var uploadRoutes = require('./routes/upload');
 var imagenesRoutes = require('./routes/imagenes');
+var exportacionesRoutes = require('./routes/exportaciones');
 var mailerRoutes = require('./routes/mailer');
 
 // Conexión a la Base de Datos
-mongoose.connection.openUri('mongodb://localhost:27017/databioDB', { useNewUrlParser: true, useUnifiedTopology: true }, (err, res) => {
+mongoose.connection.openUri('mongodb://localhost:27017/databioDB', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }, (err, res) => {
     if (err) throw err;
     console.log('Base de Datos: \x1b[32m%s\x1b[0m', 'online');
 });
@@ -47,11 +49,13 @@ app.use('/darwinCore', darwinCoreRoutes);
 app.use('/usuario', usuarioRoutes);
 app.use('/fotografia', fotografiaRoutes);
 app.use('/comentario', comentarioRoutes);
+app.use('/puntuacion', puntuacionRoutes);
 app.use('/metadato', metadatoRoutes);
 app.use('/login', loginRoutes);
 app.use('/busqueda', busquedaRoutes);
 app.use('/upload', uploadRoutes);
 app.use('/img', imagenesRoutes);
+app.use('/export', exportacionesRoutes);
 app.use('/enviar', mailerRoutes);
 app.use('/', appRoutes);
 

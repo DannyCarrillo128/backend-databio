@@ -1,7 +1,8 @@
 var express = require('express');
-var nodemailer = require("nodemailer");
 
 var app = express();
+
+var nodemailer = require("nodemailer");
 
 // ===============================================================
 // Enviar Solicitud de Acceso

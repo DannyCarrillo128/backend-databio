@@ -1,533 +1,18 @@
 var express = require('express');
-var mongodb = require("mongodb").MongoClient;
-var fastcsv = require("fast-csv");
-const spawn = require('child_process').spawn;
-
-let { PythonShell } = require('python-shell');
 
 var mdAutenticacion = require('../middlewares/autenticacion');
 
-const multipart = require('connect-multiparty');
-
 var app = express();
 
-var DarwinCore = require('../models/darwinCore');
-
-const fileUpload = require('express-fileupload');
-
-app.use(fileUpload());
-
-var bodyParser = require('body-parser');
-var multer = require('multer');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
-
+var fileUpload = require('express-fileupload');
 var fs = require("fs");
+
 var fastcsv = require("fast-csv");
+var { format } = require('@fast-csv/format');
 
+var { PythonShell } = require('python-shell');
 
-var csv = require('fast-csv');
-
-/* const multipartMiddleware = multipart({
-    uploadDir: './uploads/csv'
-}); */
-
-app.post('/uploads/csv', (req, res) => {
-    let EDFile = req.files.file
-    if (!EDFile) {
-        res.send("File was not found");
-        return;
-    } else {
-        let fullDate = new Date();
-        let day = ("0" + fullDate.getDate()).slice(-2);
-        let month = ("0" + (fullDate.getMonth() + 1)).slice(-2);
-        let date = fullDate.getFullYear() + month + day + fullDate.getHours() + fullDate.getMinutes() + ".csv"
-        EDFile.name = date;
-        EDFile.mv(`./uploads/csv/${EDFile.name}`, err => {
-            if (err) return res.status(500).send({ message: err })
-
-            else {
-                let options = {
-                    mode: 'text',
-                    pythonPath: 'C:/Python27/python.exe',
-                    args: [`./uploads/csv/${EDFile.name}`]
-                };
-
-
-
-                PythonShell.run('./preprocesamiento/pre.py', options, function(err, results) {
-                    if (err) throw err;
-                    let url = "mongodb://localhost:27017/databioDB";
-                    let stream = fs.createReadStream('./preprocesamiento/data.csv');
-                    let csvData = [];
-                    let csvStream = fastcsv
-                        .parse()
-                        .on("data", function(data) {
-                            csvData.push({
-                                type: data[0],
-                                modified: data[1],
-                                language: data[2],
-                                license: data[3],
-                                rightsHolder: data[4],
-                                accessRights: data[5],
-                                bibliographicCitation: data[6],
-                                references: data[7],
-                                institutionID: data[8],
-                                collectionID: data[9],
-                                datasetID: data[10],
-                                institutionCode: data[11],
-                                collectionCode: data[12],
-                                datasetName: data[13],
-                                ownerInstitutionCode: data[14],
-                                basisOfRecord: data[15],
-                                informationWithheld: data[16],
-                                dataGeneralizations: data[17],
-                                dynamicProperties: data[18],
-                                // Occurrence
-                                occurrenceID: data[19],
-                                catalogNumber: data[20],
-                                recordNumber: data[21],
-                                recordedBy: data[22],
-                                individualCount: data[23],
-                                organismQuantity: data[24],
-                                organismQuantityType: data[25],
-                                sex: data[26],
-                                lifeStage: data[27],
-                                reproductiveCondition: data[28],
-                                behavior: data[29],
-                                establishmentMeans: data[30],
-                                occurrenceStatus: data[31],
-                                preparations: data[32],
-                                disposition: data[33],
-                                associatedMedia: data[34],
-                                associatedReferences: data[35],
-                                associatedSequences: data[36],
-                                associatedTaxa: data[37],
-                                otherCatalogNumbers: data[38],
-                                occurrenceRemarks: data[39],
-                                // Organism
-                                organismID: data[40],
-                                organismName: data[41],
-                                organismScope: data[42],
-                                associatedOccurrences: data[43],
-                                associatedOrganisms: data[44],
-                                previousIdentifications: data[45],
-                                organismRemarks: data[46],
-                                // MaterialSample
-                                materialSampleID: data[47],
-                                // Event
-                                eventID: data[48],
-                                parentEventID: data[49],
-                                fieldNumber: data[50],
-                                eventDate: data[51],
-                                eventTime: data[52],
-                                startDayOfYear: data[53],
-                                endDayOfYear: data[54],
-                                year: data[55],
-                                month: data[56],
-                                day: data[57],
-                                verbatimEventDate: data[58],
-                                habitat: data[59],
-                                samplingProtocol: data[60],
-                                sampleSizeValue: data[61],
-                                sampleSizeUnit: data[62],
-                                samplingEffort: data[63],
-                                fieldNotes: data[64],
-                                eventRemarks: data[65],
-                                // Location
-                                locationID: data[66],
-                                higherGeographyID: data[67],
-                                higherGeography: data[68],
-                                continent: data[69],
-                                waterBody: data[70],
-                                islandGroup: data[71],
-                                island: data[72],
-                                country: data[73],
-                                countryCode: data[74],
-                                stateProvince: data[75],
-                                county: data[76],
-                                municipality: data[77],
-                                locality: data[78],
-                                verbatimLocality: data[79],
-                                minimumElevationInMeters: data[80],
-                                maximumElevationInMeters: data[81],
-                                verbatimElevation: data[82],
-                                minimumDepthInMeters: data[83],
-                                maximumDepthInMeters: data[84],
-                                verbatimDepth: data[85],
-                                minimumDistanceAboveSurfaceInMeters: data[86],
-                                maximumDistanceAboveSurfaceInMeters: data[87],
-                                locationAccordingTo: data[88],
-                                locationRemarks: data[89],
-                                decimalLatitude: data[90],
-                                decimalLongitude: data[91],
-                                geodeticDatum: data[92],
-                                coordinateUncertaintyInMeters: data[93],
-                                coordinatePrecision: data[94],
-                                pointRadiusSpatialFit: data[95],
-                                verbatimCoordinates: data[96],
-                                verbatimLatitude: data[97],
-                                verbatimLongitude: data[98],
-                                verbatimCoordinateSystem: data[99],
-                                verbatimSRS: data[100],
-                                footprintWKT: data[101],
-                                footprintSRS: data[102],
-                                footprintSpatialFit: data[103],
-                                georeferencedBy: data[104],
-                                georeferencedDate: data[105],
-                                georeferenceProtocol: data[106],
-                                georeferenceSources: data[107],
-                                georeferenceVerificationStatus: data[108],
-                                georeferenceRemarks: data[109],
-                                // GeologicalContext
-                                geologicalContextID: data[110],
-                                earliestEonOrLowestEonothem: data[111],
-                                latestEonOrHighestEonothem: data[112],
-                                earliestEraOrLowestErathem: data[113],
-                                latestEraOrHighestErathem: data[114],
-                                earliestPeriodOrLowestSystem: data[115],
-                                latestPeriodOrHighestSystem: data[116],
-                                earliestEpochOrLowestSeries: data[117],
-                                latestEpochOrHighestSeries: data[118],
-                                earliestAgeOrLowestStage: data[119],
-                                latestAgeOrHighestStage: data[120],
-                                lowestBiostratigraphicZone: data[121],
-                                highestBiostratigraphicZone: data[122],
-                                lithostratigraphicTerms: data[123],
-                                group: data[124],
-                                formation: data[125],
-                                member: data[126],
-                                bed: data[127],
-                                // Identification
-                                identificationID: data[128],
-                                identificationQualifier: data[129],
-                                typeStatus: data[130],
-                                identifiedBy: data[131],
-                                dateIdentified: data[132],
-                                identificationReferences: data[133],
-                                identificationVerificationStatus: data[134],
-                                identificationRemarks: data[135],
-                                // Taxon
-                                taxonID: data[136],
-                                scientificNameID: data[137],
-                                acceptedNameUsageID: data[138],
-                                parentNameUsageID: data[139],
-                                originalNameUsageIDProperty: data[140],
-                                nameAccordingToID: data[141],
-                                namePublishedInID: data[142],
-                                taxonConceptID: data[143],
-                                scientificName: data[144],
-                                acceptedNameUsage: data[145],
-                                parentNameUsage: data[146],
-                                originalNameUsage: data[147],
-                                nameAccordingTo: data[148],
-                                namePublishedIn: data[149],
-                                namePublishedInYear: data[150],
-                                higherClassification: data[151],
-                                kingdom: data[152],
-                                phylum: data[153],
-                                _class: data[154],
-                                order: data[155],
-                                family: data[156],
-                                genus: data[157],
-                                subgenus: data[158],
-                                specificEpithet: data[159],
-                                infraspecificEpithet: data[160],
-                                taxonRank: data[161],
-                                verbatimTaxonRank: data[162],
-                                scientificNameAuthorship: data[163],
-                                vernacularName: data[164],
-                                nomenclaturalCode: data[165],
-                                taxonomicStatus: data[166],
-                                nomenclaturalStatus: data[167],
-                                taxonRemarks: data[168],
-                                // MeasurementOrFact
-                                measurementID: data[169],
-                                measurementType: data[170],
-                                measurementValue: data[171],
-                                measurementAccuracy: data[172],
-                                measurementUnit: data[173],
-                                measurementDeterminedBy: data[174],
-                                measurementDeterminedDate: data[175],
-                                measurementMethod: data[176],
-                                measurementRemarks: data[177],
-                                // ResourceRelationship
-                                resourceRelationshipID: data[178],
-                                resourceID: data[179],
-                                relatedResourceID: data[180],
-                                relationshipOfResource: data[181],
-                                relationshipAccordingTo: data[182],
-                                relationshipEstablishedDate: data[183],
-                                relationshipRemarks: data[184]
-                            });
-                        })
-                        .on("end", function() {
-                            // remove the first line: header
-                            csvData.shift();
-
-                            console.log(csvData);
-
-                            mongodb.connect(
-                                url, { useNewUrlParser: true, useUnifiedTopology: true },
-                                (err, client) => {
-                                    if (err) throw err;
-
-                                    client
-                                        .db("databioDB")
-                                        .collection("darwinCores")
-                                        .insertMany(csvData, (err, res) => {
-                                            if (err) throw err;
-
-                                            console.log(`Inserted: ${res.insertedCount} rows`);
-                                            client.close();
-                                        });
-                                }
-                            );
-                        });
-
-                    stream.pipe(csvStream);
-
-                });
-            }
-
-            /* else {
-                const process = spawn('python', ['./preprocesamiento/pre.py', `./uploads/csv/${EDFile.name}`])
-                process.stdout.on('data', data => {
-                    let url = "mongodb://localhost:27017/databioDB";
-                    let stream = fs.createReadStream('./preprocesamiento/data.csv');
-                    let csvData = [];
-                    let csvStream = fastcsv
-                        .parse()
-                        .on("data", function(data) {
-                            csvData.push({
-                                type: data[0],
-                                modified: data[1],
-                                language: data[2],
-                                license: data[3],
-                                rightsHolder: data[4],
-                                accessRights: data[5],
-                                bibliographicCitation: data[6],
-                                references: data[7],
-                                institutionID: data[8],
-                                collectionID: data[9],
-                                datasetID: data[10],
-                                institutionCode: data[11],
-                                collectionCode: data[12],
-                                datasetName: data[13],
-                                ownerInstitutionCode: data[14],
-                                basisOfRecord: data[15],
-                                informationWithheld: data[16],
-                                dataGeneralizations: data[17],
-                                dynamicProperties: data[18],
-                                // Occurrence
-                                occurrenceID: data[19],
-                                catalogNumber: data[20],
-                                recordNumber: data[21],
-                                recordedBy: data[22],
-                                individualCount: data[23],
-                                organismQuantity: data[24],
-                                organismQuantityType: data[25],
-                                sex: data[26],
-                                lifeStage: data[27],
-                                reproductiveCondition: data[28],
-                                behavior: data[29],
-                                establishmentMeans: data[30],
-                                occurrenceStatus: data[31],
-                                preparations: data[32],
-                                disposition: data[33],
-                                associatedMedia: data[34],
-                                associatedReferences: data[35],
-                                associatedSequences: data[36],
-                                associatedTaxa: data[37],
-                                otherCatalogNumbers: data[38],
-                                occurrenceRemarks: data[39],
-                                // Organism
-                                organismID: data[40],
-                                organismName: data[41],
-                                organismScope: data[42],
-                                associatedOccurrences: data[43],
-                                associatedOrganisms: data[44],
-                                previousIdentifications: data[45],
-                                organismRemarks: data[46],
-                                // MaterialSample
-                                materialSampleID: data[47],
-                                // Event
-                                eventID: data[48],
-                                parentEventID: data[49],
-                                fieldNumber: data[50],
-                                eventDate: data[51],
-                                eventTime: data[52],
-                                startDayOfYear: data[53],
-                                endDayOfYear: data[54],
-                                year: data[55],
-                                month: data[56],
-                                day: data[57],
-                                verbatimEventDate: data[58],
-                                habitat: data[59],
-                                samplingProtocol: data[60],
-                                sampleSizeValue: data[61],
-                                sampleSizeUnit: data[62],
-                                samplingEffort: data[63],
-                                fieldNotes: data[64],
-                                eventRemarks: data[65],
-                                // Location
-                                locationID: data[66],
-                                higherGeographyID: data[67],
-                                higherGeography: data[68],
-                                continent: data[69],
-                                waterBody: data[70],
-                                islandGroup: data[71],
-                                island: data[72],
-                                country: data[73],
-                                countryCode: data[74],
-                                stateProvince: data[75],
-                                county: data[76],
-                                municipality: data[77],
-                                locality: data[78],
-                                verbatimLocality: data[79],
-                                minimumElevationInMeters: data[80],
-                                maximumElevationInMeters: data[81],
-                                verbatimElevation: data[82],
-                                minimumDepthInMeters: data[83],
-                                maximumDepthInMeters: data[84],
-                                verbatimDepth: data[85],
-                                minimumDistanceAboveSurfaceInMeters: data[86],
-                                maximumDistanceAboveSurfaceInMeters: data[87],
-                                locationAccordingTo: data[88],
-                                locationRemarks: data[89],
-                                decimalLatitude: data[90],
-                                decimalLongitude: data[91],
-                                geodeticDatum: data[92],
-                                coordinateUncertaintyInMeters: data[93],
-                                coordinatePrecision: data[94],
-                                pointRadiusSpatialFit: data[95],
-                                verbatimCoordinates: data[96],
-                                verbatimLatitude: data[97],
-                                verbatimLongitude: data[98],
-                                verbatimCoordinateSystem: data[99],
-                                verbatimSRS: data[100],
-                                footprintWKT: data[101],
-                                footprintSRS: data[102],
-                                footprintSpatialFit: data[103],
-                                georeferencedBy: data[104],
-                                georeferencedDate: data[105],
-                                georeferenceProtocol: data[106],
-                                georeferenceSources: data[107],
-                                georeferenceVerificationStatus: data[108],
-                                georeferenceRemarks: data[109],
-                                // GeologicalContext
-                                geologicalContextID: data[110],
-                                earliestEonOrLowestEonothem: data[111],
-                                latestEonOrHighestEonothem: data[112],
-                                earliestEraOrLowestErathem: data[113],
-                                latestEraOrHighestErathem: data[114],
-                                earliestPeriodOrLowestSystem: data[115],
-                                latestPeriodOrHighestSystem: data[116],
-                                earliestEpochOrLowestSeries: data[117],
-                                latestEpochOrHighestSeries: data[118],
-                                earliestAgeOrLowestStage: data[119],
-                                latestAgeOrHighestStage: data[120],
-                                lowestBiostratigraphicZone: data[121],
-                                highestBiostratigraphicZone: data[122],
-                                lithostratigraphicTerms: data[123],
-                                group: data[124],
-                                formation: data[125],
-                                member: data[126],
-                                bed: data[127],
-                                // Identification
-                                identificationID: data[128],
-                                identificationQualifier: data[129],
-                                typeStatus: data[130],
-                                identifiedBy: data[131],
-                                dateIdentified: data[132],
-                                identificationReferences: data[133],
-                                identificationVerificationStatus: data[134],
-                                identificationRemarks: data[135],
-                                // Taxon
-                                taxonID: data[136],
-                                scientificNameID: data[137],
-                                acceptedNameUsageID: data[138],
-                                parentNameUsageID: data[139],
-                                originalNameUsageIDProperty: data[140],
-                                nameAccordingToID: data[141],
-                                namePublishedInID: data[142],
-                                taxonConceptID: data[143],
-                                scientificName: data[144],
-                                acceptedNameUsage: data[145],
-                                parentNameUsage: data[146],
-                                originalNameUsage: data[147],
-                                nameAccordingTo: data[148],
-                                namePublishedIn: data[149],
-                                namePublishedInYear: data[150],
-                                higherClassification: data[151],
-                                kingdom: data[152],
-                                phylum: data[153],
-                                _class: data[154],
-                                order: data[155],
-                                family: data[156],
-                                genus: data[157],
-                                subgenus: data[158],
-                                specificEpithet: data[159],
-                                infraspecificEpithet: data[160],
-                                taxonRank: data[161],
-                                verbatimTaxonRank: data[162],
-                                scientificNameAuthorship: data[163],
-                                vernacularName: data[164],
-                                nomenclaturalCode: data[165],
-                                taxonomicStatus: data[166],
-                                nomenclaturalStatus: data[167],
-                                taxonRemarks: data[168],
-                                // MeasurementOrFact
-                                measurementID: data[169],
-                                measurementType: data[170],
-                                measurementValue: data[171],
-                                measurementAccuracy: data[172],
-                                measurementUnit: data[173],
-                                measurementDeterminedBy: data[174],
-                                measurementDeterminedDate: data[175],
-                                measurementMethod: data[176],
-                                measurementRemarks: data[177],
-                                // ResourceRelationship
-                                resourceRelationshipID: data[178],
-                                resourceID: data[179],
-                                relatedResourceID: data[180],
-                                relationshipOfResource: data[181],
-                                relationshipAccordingTo: data[182],
-                                relationshipEstablishedDate: data[183],
-                                relationshipRemarks: data[184]
-                            });
-                        })
-                        .on("end", function() {
-                            // remove the first line: header
-                            csvData.shift();
-                            console.log(csvData);
-                            mongodb.connect(
-                                url, { useNewUrlParser: true, useUnifiedTopology: true },
-                                (err, client) => {
-                                    if (err) throw err;
-                                    client
-                                        .db("databioDB")
-                                        .collection("darwinCores")
-                                        .insertMany(csvData, (err, res) => {
-                                            if (err) throw err;
-                                            console.log(`Inserted: ${res.insertedCount} rows`);
-                                            client.close();
-                                        });
-                                }
-                            );
-                        });
-                    stream.pipe(csvStream);
-                });
-            } */
-
-
-
-
-        })
-    }
-});
+var DarwinCore = require('../models/darwinCore');
 
 // ===============================================================
 // Obtener todos los registros de DarwinCore
@@ -568,7 +53,6 @@ app.get('/:id', (req, res) => {
     var id = req.params.id;
 
     DarwinCore.findById(id)
-        //.populate('fotografia')
         .exec((err, darwinCore) => {
             if (err) {
                 return res.status(500).json({
@@ -1154,6 +638,769 @@ app.delete('/:id', mdAutenticacion.verificaToken, (req, res) => {
         res.status(200).json({
             ok: true,
             darwinCore: darwinCoreBorrado
+        });
+    });
+});
+
+
+// ===============================================================
+// Importar registros
+// ===============================================================
+app.use(fileUpload());
+
+app.post('/importar', mdAutenticacion.verificaToken, (req, res) => {
+
+    if (!req.files) {
+        return res.status(400).json({
+            ok: false,
+            mensaje: 'Ningún archivo seleccionado',
+            errors: { message: 'Ningún archivo seleccionado' }
+        });
+    }
+
+    var EDFile = req.files.file;
+
+    var fullDate = new Date();
+    var day = ("0" + fullDate.getDate()).slice(-2);
+    var month = ("0" + (fullDate.getMonth() + 1)).slice(-2);
+    var date = fullDate.getFullYear() + month + day + fullDate.getHours() + fullDate.getMinutes() + ".csv"
+    EDFile.name = date;
+    EDFile.mv(`./uploads/csv/${EDFile.name}`, (err) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                errors: err
+            });
+        }
+
+        var options = {
+            mode: 'text',
+            pythonPath: 'C:/Python27/python.exe',
+            args: [`./uploads/csv/${EDFile.name}`]
+        };
+
+        PythonShell.run('./preprocesamiento/pre.py', options, (err) => {
+            if (err) throw err;
+
+            var stream = fs.createReadStream('./preprocesamiento/data.csv');
+            var csvData = [];
+            var csvStream = fastcsv
+                .parse()
+                .on("data", (data) => {
+                    csvData.push({
+                        registro: data[0],
+                        type: data[1],
+                        modified: data[2],
+                        language: data[3],
+                        license: data[4],
+                        rightsHolder: data[5],
+                        accessRights: data[6],
+                        bibliographicCitation: data[7],
+                        references: data[8],
+                        institutionID: data[9],
+                        collectionID: data[10],
+                        datasetID: data[11],
+                        institutionCode: data[12],
+                        collectionCode: data[13],
+                        datasetName: data[14],
+                        ownerInstitutionCode: data[15],
+                        basisOfRecord: data[16],
+                        informationWithheld: data[17],
+                        dataGeneralizations: data[18],
+                        dynamicProperties: data[19],
+                        // Occurrence
+                        occurrenceID: data[20],
+                        catalogNumber: data[21],
+                        recordNumber: data[22],
+                        recordedBy: data[23],
+                        individualCount: data[24],
+                        organismQuantity: data[25],
+                        organismQuantityType: data[26],
+                        sex: data[27],
+                        lifeStage: data[28],
+                        reproductiveCondition: data[29],
+                        behavior: data[30],
+                        establishmentMeans: data[31],
+                        occurrenceStatus: data[32],
+                        preparations: data[33],
+                        disposition: data[34],
+                        associatedMedia: data[35],
+                        associatedReferences: data[36],
+                        associatedSequences: data[37],
+                        associatedTaxa: data[38],
+                        otherCatalogNumbers: data[39],
+                        occurrenceRemarks: data[40],
+                        // Organism
+                        organismID: data[41],
+                        organismName: data[42],
+                        organismScope: data[43],
+                        associatedOccurrences: data[44],
+                        associatedOrganisms: data[45],
+                        previousIdentifications: data[46],
+                        organismRemarks: data[47],
+                        // MaterialSample
+                        materialSampleID: data[48],
+                        // Event
+                        eventID: data[49],
+                        parentEventID: data[50],
+                        fieldNumber: data[51],
+                        eventDate: data[52],
+                        eventTime: data[53],
+                        startDayOfYear: data[54],
+                        endDayOfYear: data[55],
+                        year: data[56],
+                        month: data[57],
+                        day: data[58],
+                        verbatimEventDate: data[59],
+                        habitat: data[60],
+                        samplingProtocol: data[61],
+                        sampleSizeValue: data[62],
+                        sampleSizeUnit: data[63],
+                        samplingEffort: data[64],
+                        fieldNotes: data[65],
+                        eventRemarks: data[66],
+                        // Location
+                        locationID: data[67],
+                        higherGeographyID: data[68],
+                        higherGeography: data[69],
+                        continent: data[70],
+                        waterBody: data[71],
+                        islandGroup: data[72],
+                        island: data[73],
+                        country: data[74],
+                        countryCode: data[75],
+                        stateProvince: data[76],
+                        county: data[77],
+                        municipality: data[78],
+                        locality: data[79],
+                        verbatimLocality: data[80],
+                        minimumElevationInMeters: data[81],
+                        maximumElevationInMeters: data[82],
+                        verbatimElevation: data[83],
+                        minimumDepthInMeters: data[84],
+                        maximumDepthInMeters: data[85],
+                        verbatimDepth: data[86],
+                        minimumDistanceAboveSurfaceInMeters: data[87],
+                        maximumDistanceAboveSurfaceInMeters: data[88],
+                        locationAccordingTo: data[89],
+                        locationRemarks: data[90],
+                        decimalLatitude: data[91],
+                        decimalLongitude: data[92],
+                        geodeticDatum: data[93],
+                        coordinateUncertaintyInMeters: data[94],
+                        coordinatePrecision: data[95],
+                        pointRadiusSpatialFit: data[96],
+                        verbatimCoordinates: data[97],
+                        verbatimLatitude: data[98],
+                        verbatimLongitude: data[99],
+                        verbatimCoordinateSystem: data[100],
+                        verbatimSRS: data[101],
+                        footprintWKT: data[102],
+                        footprintSRS: data[103],
+                        footprintSpatialFit: data[104],
+                        georeferencedBy: data[105],
+                        georeferencedDate: data[106],
+                        georeferenceProtocol: data[107],
+                        georeferenceSources: data[108],
+                        georeferenceVerificationStatus: data[109],
+                        georeferenceRemarks: data[110],
+                        // GeologicalContext
+                        geologicalContextID: data[111],
+                        earliestEonOrLowestEonothem: data[112],
+                        latestEonOrHighestEonothem: data[113],
+                        earliestEraOrLowestErathem: data[114],
+                        latestEraOrHighestErathem: data[115],
+                        earliestPeriodOrLowestSystem: data[116],
+                        latestPeriodOrHighestSystem: data[117],
+                        earliestEpochOrLowestSeries: data[118],
+                        latestEpochOrHighestSeries: data[119],
+                        earliestAgeOrLowestStage: data[120],
+                        latestAgeOrHighestStage: data[121],
+                        lowestBiostratigraphicZone: data[122],
+                        highestBiostratigraphicZone: data[123],
+                        lithostratigraphicTerms: data[124],
+                        group: data[125],
+                        formation: data[126],
+                        member: data[127],
+                        bed: data[128],
+                        // Identification
+                        identificationID: data[129],
+                        identificationQualifier: data[130],
+                        typeStatus: data[131],
+                        identifiedBy: data[132],
+                        dateIdentified: data[133],
+                        identificationReferences: data[134],
+                        identificationVerificationStatus: data[135],
+                        identificationRemarks: data[136],
+                        // Taxon
+                        taxonID: data[137],
+                        scientificNameID: data[138],
+                        acceptedNameUsageID: data[139],
+                        parentNameUsageID: data[140],
+                        originalNameUsageID: data[141],
+                        nameAccordingToID: data[142],
+                        namePublishedInID: data[143],
+                        taxonConceptID: data[144],
+                        scientificName: data[145],
+                        acceptedNameUsage: data[146],
+                        parentNameUsage: data[147],
+                        originalNameUsage: data[148],
+                        nameAccordingTo: data[149],
+                        namePublishedIn: data[150],
+                        namePublishedInYear: data[151],
+                        higherClassification: data[152],
+                        kingdom: data[153],
+                        phylum: data[154],
+                        _class: data[155],
+                        order: data[156],
+                        family: data[157],
+                        genus: data[158],
+                        subgenus: data[159],
+                        specificEpithet: data[160],
+                        infraspecificEpithet: data[161],
+                        taxonRank: data[162],
+                        verbatimTaxonRank: data[163],
+                        scientificNameAuthorship: data[164],
+                        vernacularName: data[165],
+                        nomenclaturalCode: data[166],
+                        taxonomicStatus: data[167],
+                        nomenclaturalStatus: data[168],
+                        taxonRemarks: data[169],
+                        // MeasurementOrFact
+                        measurementID: data[170],
+                        measurementType: data[171],
+                        measurementValue: data[172],
+                        measurementAccuracy: data[173],
+                        measurementUnit: data[174],
+                        measurementDeterminedBy: data[175],
+                        measurementDeterminedDate: data[176],
+                        measurementMethod: data[177],
+                        measurementRemarks: data[178],
+                        // ResourceRelationship
+                        resourceRelationshipID: data[179],
+                        resourceID: data[180],
+                        relatedResourceID: data[181],
+                        relationshipOfResource: data[182],
+                        relationshipAccordingTo: data[183],
+                        relationshipEstablishedDate: data[184],
+                        relationshipRemarks: data[185]
+                    });
+                })
+                .on("end", () => {
+                    csvData.shift();
+
+                    DarwinCore.insertMany(csvData, (err, res) => {
+                        if (err) throw err;
+                    });
+
+                    res.status(200).json({
+                        ok: true,
+                        mensaje: 'Registros importados correctamente'
+                    });
+                });
+            stream.pipe(csvStream);
+        });
+    });
+});
+
+
+// ===============================================================
+// Exportar Vista Simplificada
+// ===============================================================
+app.get('/exportar/simple/:formato', mdAutenticacion.verificaToken, (req, res) => {
+    var formato = req.params.formato;
+    var separador = '';
+
+    switch (formato) {
+        case 'csv':
+            var ws = fs.createWriteStream('./uploads/exportaciones/DwC-Simplificado.csv');
+            separador = ',';
+            break;
+
+        case 'tsv':
+            separador = '\t';
+            var ws = fs.createWriteStream('./uploads/exportaciones/DwC-Simplificado.txt');
+            break;
+
+        default:
+            return res.status(400).json({
+                ok: false,
+                mensaje: '',
+                error: { message: 'Formato no válido' }
+            });
+    }
+
+    var csvStream = format({ delimiter: separador, headers: ['#', 'Nombre', 'Número de Catálogo', 'Colector(es)', 'Reino', 'Phylum', 'Clase', 'Orden', 'Familia', 'Género', 'País', 'Departamento', 'Municipio', 'Localidad', 'Latitud', 'Longitud'] });
+
+    DarwinCore.find((err, darwinCores) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error cargando los registros de DarwinCore',
+                errors: err
+            });
+        }
+
+        csvStream.pipe(ws)
+            .on('end', () => process.exit());
+
+        darwinCores.forEach(doc => {
+            csvStream.write([doc.registro, doc.scientificName, doc.catalogNumber, doc.recordedBy, doc.kingdom, doc.phylum, doc._class, doc.order, doc.family, doc.genus, doc.country, doc.stateProvince, doc.county, doc.locality, doc.verbatimLatitude, doc.verbatimLongitude]);
+        });
+
+        res.status(200).json({
+            ok: true,
+            mensaje: 'Archivo exportado'
+        });
+    });
+});
+
+
+// ===============================================================
+// Exportar Vista Completa
+// ===============================================================
+app.get('/exportar/completo/:formato', mdAutenticacion.verificaToken, (req, res) => {
+    var formato = req.params.formato;
+    var separador = '';
+
+    switch (formato) {
+        case 'csv':
+            var ws = fs.createWriteStream('./uploads/exportaciones/DwC.csv');
+            separador = ',';
+            break;
+
+        case 'tsv':
+            separador = '\t';
+            var ws = fs.createWriteStream('./uploads/exportaciones/DwC.txt');
+            break;
+
+        default:
+            return res.status(400).json({
+                ok: false,
+                mensaje: '',
+                error: { message: 'Formato no válido' }
+            });
+    }
+
+    var csvStream = format({
+        delimiter: separador,
+        headers: [
+            // Record-Level
+            'registro',
+            'type',
+            'modified',
+            'language',
+            'license',
+            'rightsHolder',
+            'accessRights',
+            'bibliographicCitation',
+            'references',
+            'institutionID',
+            'collectionID',
+            'datasetID',
+            'institutionCode',
+            'collectionCode',
+            'datasetName',
+            'ownerInstitutionCode',
+            'basisOfRecord',
+            'informationWithheld',
+            'dataGeneralizations',
+            'dynamicProperties',
+            // Occurrence
+            'occurrenceID',
+            'catalogNumber',
+            'recordNumber',
+            'recordedBy',
+            'individualCount',
+            'organismQuantity',
+            'organismQuantityType',
+            'sex',
+            'lifeStage',
+            'reproductiveCondition',
+            'behavior',
+            'establishmentMeans',
+            'occurrenceStatus',
+            'preparations',
+            'disposition',
+            'associatedMedia',
+            'associatedReferences',
+            'associatedSequences',
+            'associatedTaxa',
+            'otherCatalogNumbers',
+            'occurrenceRemarks',
+            // Organism
+            'organismID',
+            'organismName',
+            'organismScope',
+            'associatedOccurrences',
+            'associatedOrganisms',
+            'previousIdentifications',
+            'organismRemarks',
+            // MaterialSample
+            'materialSampleID',
+            // Event
+            'eventID',
+            'parentEventID',
+            'fieldNumber',
+            'eventDate',
+            'eventTime',
+            'startDayOfYear',
+            'endDayOfYear',
+            'year',
+            'month',
+            'day',
+            'verbatimEventDate',
+            'habitat',
+            'samplingProtocol',
+            'sampleSizeValue',
+            'sampleSizeUnit',
+            'samplingEffort',
+            'fieldNotes',
+            'eventRemarks',
+            // Location
+            'locationID',
+            'higherGeographyID',
+            'higherGeography',
+            'continent',
+            'waterBody',
+            'islandGroup',
+            'island',
+            'country',
+            'countryCode',
+            'stateProvince',
+            'county',
+            'municipality',
+            'locality',
+            'verbatimLocality',
+            'minimumElevationInMeters',
+            'maximumElevationInMeters',
+            'verbatimElevation',
+            'minimumDepthInMeters',
+            'maximumDepthInMeters',
+            'verbatimDepth',
+            'minimumDistanceAboveSurfaceInMeters',
+            'maximumDistanceAboveSurfaceInMeters',
+            'locationAccordingTo',
+            'locationRemarks',
+            'decimalLatitude',
+            'decimalLongitude',
+            'geodeticDatum',
+            'coordinateUncertaintyInMeters',
+            'coordinatePrecision',
+            'pointRadiusSpatialFit',
+            'verbatimCoordinates',
+            'verbatimLatitude',
+            'verbatimLongitude',
+            'verbatimCoordinateSystem',
+            'verbatimSRS',
+            'footprintWKT',
+            'footprintSRS',
+            'footprintSpatialFit',
+            'georeferencedBy',
+            'georeferencedDate',
+            'georeferenceProtocol',
+            'georeferenceSources',
+            'georeferenceVerificationStatus',
+            'georeferenceRemarks',
+            // GeologicalContext
+            'geologicalContextID',
+            'earliestEonOrLowestEonothem',
+            'latestEonOrHighestEonothem',
+            'earliestEraOrLowestErathem',
+            'latestEraOrHighestErathem',
+            'earliestPeriodOrLowestSystem',
+            'latestPeriodOrHighestSystem',
+            'earliestEpochOrLowestSeries',
+            'latestEpochOrHighestSeries',
+            'earliestAgeOrLowestStage',
+            'latestAgeOrHighestStage',
+            'lowestBiostratigraphicZone',
+            'highestBiostratigraphicZone',
+            'lithostratigraphicTerms',
+            'group',
+            'formation',
+            'member',
+            'bed',
+            // Identification
+            'identificationID',
+            'identificationQualifier',
+            'typeStatus',
+            'identifiedBy',
+            'dateIdentified',
+            'identificationReferences',
+            'identificationVerificationStatus',
+            'identificationRemarks',
+            // Taxon
+            'taxonID',
+            'scientificNameID',
+            'acceptedNameUsageID',
+            'parentNameUsageID',
+            'originalNameUsageID',
+            'nameAccordingToID',
+            'namePublishedInID',
+            'taxonConceptID',
+            'scientificName',
+            'acceptedNameUsage',
+            'parentNameUsage',
+            'originalNameUsage',
+            'nameAccordingTo',
+            'namePublishedIn',
+            'namePublishedInYear',
+            'higherClassification',
+            'kingdom',
+            'phylum',
+            'class',
+            'order',
+            'family',
+            'genus',
+            'subgenus',
+            'specificEpithet',
+            'infraspecificEpithet',
+            'taxonRank',
+            'verbatimTaxonRank',
+            'scientificNameAuthorship',
+            'vernacularName',
+            'nomenclaturalCode',
+            'taxonomicStatus',
+            'nomenclaturalStatus',
+            'taxonRemarks',
+            // MeasurementOrFact
+            'measurementID',
+            'measurementType',
+            'measurementValue',
+            'measurementAccuracy',
+            'measurementUnit',
+            'measurementDeterminedBy',
+            'measurementDeterminedDate',
+            'measurementMethod',
+            'measurementRemarks',
+            // ResourceRelationship
+            'resourceRelationshipID',
+            'resourceID',
+            'relatedResourceID',
+            'relationshipOfResource',
+            'relationshipAccordingTo',
+            'relationshipEstablishedDate',
+            'relationshipRemarks'
+        ]
+    });
+
+    DarwinCore.find((err, darwinCores) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error cargando los registros de DarwinCore',
+                errors: err
+            });
+        }
+
+        csvStream.pipe(ws).on('end', () => process.exit());
+
+        darwinCores.forEach(doc => {
+            csvStream.write([
+                // Record-Level
+                doc.registro,
+                doc.type,
+                doc.modified,
+                doc.language,
+                doc.license,
+                doc.rightsHolder,
+                doc.accessRights,
+                doc.bibliographicCitation,
+                doc.references,
+                doc.institutionID,
+                doc.collectionID,
+                doc.datasetID,
+                doc.institutionCode,
+                doc.collectionCode,
+                doc.datasetName,
+                doc.ownerInstitutionCode,
+                doc.basisOfRecord,
+                doc.informationWithheld,
+                doc.dataGeneralizations,
+                doc.dynamicProperties,
+                // Occurrence
+                doc.occurrenceID,
+                doc.catalogNumber,
+                doc.recordNumber,
+                doc.recordedBy,
+                doc.individualCount,
+                doc.organismQuantity,
+                doc.organismQuantityType,
+                doc.sex,
+                doc.lifeStage,
+                doc.reproductiveCondition,
+                doc.behavior,
+                doc.establishmentMeans,
+                doc.occurrenceStatus,
+                doc.preparations,
+                doc.disposition,
+                doc.associatedMedia,
+                doc.associatedReferences,
+                doc.associatedSequences,
+                doc.associatedTaxa,
+                doc.otherCatalogNumbers,
+                doc.occurrenceRemarks,
+                // Organism
+                doc.organismID,
+                doc.organismName,
+                doc.organismScope,
+                doc.associatedOccurrences,
+                doc.associatedOrganisms,
+                doc.previousIdentifications,
+                doc.organismRemarks,
+                // MaterialSample
+                doc.materialSampleID,
+                // Event
+                doc.eventID,
+                doc.parentEventID,
+                doc.fieldNumber,
+                doc.eventDate,
+                doc.eventTime,
+                doc.startDayOfYear,
+                doc.endDayOfYear,
+                doc.year,
+                doc.month,
+                doc.day,
+                doc.verbatimEventDate,
+                doc.habitat,
+                doc.samplingProtocol,
+                doc.sampleSizeValue,
+                doc.sampleSizeUnit,
+                doc.samplingEffort,
+                doc.fieldNotes,
+                doc.eventRemarks,
+                // Location
+                doc.locationID,
+                doc.higherGeographyID,
+                doc.higherGeography,
+                doc.continent,
+                doc.waterBody,
+                doc.islandGroup,
+                doc.island,
+                doc.country,
+                doc.countryCode,
+                doc.stateProvince,
+                doc.county,
+                doc.municipality,
+                doc.locality,
+                doc.verbatimLocality,
+                doc.minimumElevationInMeters,
+                doc.maximumElevationInMeters,
+                doc.verbatimElevation,
+                doc.minimumDepthInMeters,
+                doc.maximumDepthInMeters,
+                doc.verbatimDepth,
+                doc.minimumDistanceAboveSurfaceInMeters,
+                doc.maximumDistanceAboveSurfaceInMeters,
+                doc.locationAccordingTo,
+                doc.locationRemarks,
+                doc.decimalLatitude,
+                doc.decimalLongitude,
+                doc.geodeticDatum,
+                doc.coordinateUncertaintyInMeters,
+                doc.coordinatePrecision,
+                doc.pointRadiusSpatialFit,
+                doc.verbatimCoordinates,
+                doc.verbatimLatitude,
+                doc.verbatimLongitude,
+                doc.verbatimCoordinateSystem,
+                doc.verbatimSRS,
+                doc.footprintWKT,
+                doc.footprintSRS,
+                doc.footprintSpatialFit,
+                doc.georeferencedBy,
+                doc.georeferencedDate,
+                doc.georeferenceProtocol,
+                doc.georeferenceSources,
+                doc.georeferenceVerificationStatus,
+                doc.georeferenceRemarks,
+                // GeologicalContext
+                doc.geologicalContextID,
+                doc.earliestEonOrLowestEonothem,
+                doc.latestEonOrHighestEonothem,
+                doc.earliestEraOrLowestErathem,
+                doc.latestEraOrHighestErathem,
+                doc.earliestPeriodOrLowestSystem,
+                doc.latestPeriodOrHighestSystem,
+                doc.earliestEpochOrLowestSeries,
+                doc.latestEpochOrHighestSeries,
+                doc.earliestAgeOrLowestStage,
+                doc.latestAgeOrHighestStage,
+                doc.lowestBiostratigraphicZone,
+                doc.highestBiostratigraphicZone,
+                doc.lithostratigraphicTerms,
+                doc.group,
+                doc.formation,
+                doc.member,
+                doc.bed,
+                // Identification
+                doc.identificationID,
+                doc.identificationQualifier,
+                doc.typeStatus,
+                doc.identifiedBy,
+                doc.dateIdentified,
+                doc.identificationReferences,
+                doc.identificationVerificationStatus,
+                doc.identificationRemarks,
+                // Taxon
+                doc.taxonID,
+                doc.scientificNameID,
+                doc.acceptedNameUsageID,
+                doc.parentNameUsageID,
+                doc.originalNameUsageID,
+                doc.nameAccordingToID,
+                doc.namePublishedInID,
+                doc.taxonConceptID,
+                doc.scientificName,
+                doc.acceptedNameUsage,
+                doc.parentNameUsage,
+                doc.originalNameUsage,
+                doc.nameAccordingTo,
+                doc.namePublishedIn,
+                doc.namePublishedInYear,
+                doc.higherClassification,
+                doc.kingdom,
+                doc.phylum,
+                doc._class,
+                doc.order,
+                doc.family,
+                doc.genus,
+                doc.subgenus,
+                doc.specificEpithet,
+                doc.infraspecificEpithet,
+                doc.taxonRank,
+                doc.verbatimTaxonRank,
+                doc.scientificNameAuthorship,
+                doc.vernacularName,
+                doc.nomenclaturalCode,
+                doc.taxonomicStatus,
+                doc.nomenclaturalStatus,
+                doc.taxonRemarks,
+                // MeasurementOrFact
+                doc.measurementID,
+                doc.measurementType,
+                doc.measurementValue,
+                doc.measurementAccuracy,
+                doc.measurementUnit,
+                doc.measurementDeterminedBy,
+                doc.measurementDeterminedDate,
+                doc.measurementMethod,
+                doc.measurementRemarks,
+                // ResourceRelationship
+                doc.resourceRelationshipID,
+                doc.resourceID,
+                doc.relatedResourceID,
+                doc.relationshipOfResource,
+                doc.relationshipAccordingTo,
+                doc.relationshipEstablishedDate,
+                doc.relationshipRemarks
+            ]);
+        });
+
+        res.status(200).json({
+            ok: true,
+            mensaje: 'Archivo exportado'
         });
     });
 });

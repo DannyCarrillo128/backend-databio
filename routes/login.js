@@ -47,7 +47,7 @@ app.post('/', (req, res) => {
             });
         }
 
-        if (usuarioDB.estado === 'No verificado') {
+        if (usuarioDB.estado === 'No verificado' || usuarioDB.estado === 'Inactivo') {
             return res.status(401).json({
                 ok: false,
                 mensaje: 'Acceso restringido',
@@ -119,7 +119,7 @@ app.post('/google', async(req, res) => {
                 });
             }
 
-            if (usuarioDB.estado === 'No verificado') {
+            if (usuarioDB.estado === 'No verificado' || usuarioDB.estado === 'Inactivo') {
                 return res.status(401).json({
                     ok: false,
                     mensaje: 'Acceso restringido',
@@ -174,7 +174,8 @@ function obtenerMenu(role) {
         icono: 'mdi mdi-leaf',
         submenu: [
             { titulo: 'Darwin Core', url: '/darwinCore' },
-            { titulo: 'Galería', url: '/gallery2' }
+            { titulo: 'Galería', url: '/gallery2' },
+            { titulo: 'SPARQL Endpoint', url: '/sparql' }
         ]
     }];
 

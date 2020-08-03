@@ -14,7 +14,7 @@ var intereses = {
 };
 
 var estados = {
-    values: ['No verificado', 'Verificado'],
+    values: ['No verificado', 'Verificado', 'Inactivo'],
     message: '{VALUE} no es un estado'
 }
 

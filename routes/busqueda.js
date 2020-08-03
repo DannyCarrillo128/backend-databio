@@ -143,7 +143,14 @@ function buscarDarwinCores(busqueda, regex) {
             .or([
                 // Occurrence
                 { 'catalogNumber': regex },
+                { 'recordedBy': regex },
+                //Location
+                { 'decimalLatitude': regex },
+                { 'decimalLongitude': regex },
+                { 'verbatimLatitude': regex },
+                { 'verbatimLongitude': regex },
                 // Taxon
+                { 'scientificName': regex },
                 { 'family': regex },
                 { 'genus': regex },
                 { 'subgenus': regex },
