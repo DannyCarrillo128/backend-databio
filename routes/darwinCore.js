@@ -889,13 +889,13 @@ app.post('/importar', mdAutenticacion.verificaToken, (req, res) => {
                 .on("end", () => {
                     csvData.shift();
 
-                    DarwinCore.insertMany(csvData, (err, res) => {
+                    DarwinCore.insertMany(csvData, (err) => {
                         if (err) throw err;
-                    });
 
-                    res.status(200).json({
-                        ok: true,
-                        mensaje: 'Registros importados correctamente'
+                        res.status(200).json({
+                            ok: true,
+                            mensaje: 'Registros importados correctamente'
+                        });
                     });
                 });
             stream.pipe(csvStream);
@@ -913,13 +913,13 @@ app.get('/exportar/simple/:formato', mdAutenticacion.verificaToken, (req, res) =
 
     switch (formato) {
         case 'csv':
-            var ws = fs.createWriteStream('./uploads/exportaciones/DwC-Simplificado.csv');
+            var ws = fs.createWriteStream('./uploads/exportaciones/HerbarioTULV-Simplificado.csv');
             separador = ',';
             break;
 
         case 'tsv':
             separador = '\t';
-            var ws = fs.createWriteStream('./uploads/exportaciones/DwC-Simplificado.txt');
+            var ws = fs.createWriteStream('./uploads/exportaciones/HerbarioTULV-Simplificado.txt');
             break;
 
         default:
@@ -965,13 +965,13 @@ app.get('/exportar/completo/:formato', mdAutenticacion.verificaToken, (req, res)
 
     switch (formato) {
         case 'csv':
-            var ws = fs.createWriteStream('./uploads/exportaciones/DwC.csv');
+            var ws = fs.createWriteStream('./uploads/exportaciones/HerbarioTULV.csv');
             separador = ',';
             break;
 
         case 'tsv':
             separador = '\t';
-            var ws = fs.createWriteStream('./uploads/exportaciones/DwC.txt');
+            var ws = fs.createWriteStream('./uploads/exportaciones/HerbarioTULV.txt');
             break;
 
         default:
@@ -1406,23 +1406,62 @@ app.get('/exportar/completo/:formato', mdAutenticacion.verificaToken, (req, res)
 });
 
 
-app.get('/distinct/:field', (req, res) => {
-    var field = req.params.field;
+// ===============================================================
+// Exportar CSV
+// ===============================================================
+app.get('/exportar/csv', (req, res) => {
+    var ws = fs.createWriteStream('./preprocesamiento/HerbarioTULV.csv');
+    var csvStream = format({ delimiter: ',', headers: ['catalogNumber', 'recordedBy', 'scientificName', 'family', 'institutionCode', 'continent', 'country', 'stateProvince', 'county', 'municipality', 'locality'] });
 
-    DarwinCore.distinct(field, (err, resp) => {
+    DarwinCore.find((err, darwinCores) => {
         if (err) {
             return res.status(500).json({
-                ok: true,
-                mensaje: 'Error al realizar la operación',
+                ok: false,
+                mensaje: 'Error cargando los registros de DarwinCore',
                 errors: err
             });
         }
 
+        csvStream.pipe(ws)
+            .on('end', () => process.exit());
+
+        darwinCores.forEach(doc => {
+            csvStream.write([doc.catalogNumber, doc.recordedBy, doc.scientificName, doc.family, doc.institutionCode, doc.continent, doc.country, doc.stateProvince, doc.county, doc.municipality, doc.locality]);
+        });
+
         res.status(200).json({
             ok: true,
-            respuesta: resp
+            mensaje: 'Archivo exportado'
         });
     });
 });
+
+
+// ===============================================================
+// Exportar RDF/XML
+// ===============================================================
+app.get('/exportar/rdf', (req, res) => {
+    var options = {
+        mode: 'text',
+        pythonPath: 'C:/Python27/python.exe',
+        args: [`./uploads/exportaciones/HerbarioTULV.rdf`]
+    };
+
+    PythonShell.run('./preprocesamiento/serializacion.py', options, (err) => {
+        if (err) {
+            res.status().json({
+                ok: false,
+                mensaje: 'Error al exportar el archivo',
+                errors: err
+            });
+        };
+
+        res.status(200).json({
+            ok: true,
+            mensaje: 'Archivo exportado'
+        });
+    });
+});
+
 
 module.exports = app;
