@@ -1409,7 +1409,7 @@ app.get('/exportar/completo/:formato', mdAutenticacion.verificaToken, (req, res)
 // ===============================================================
 // Exportar CSV
 // ===============================================================
-app.get('/exportar/csv', (req, res) => {
+app.get('/exportar/csv', mdAutenticacion.verificaToken, (req, res) => {
     var ws = fs.createWriteStream('./preprocesamiento/HerbarioTULV.csv');
     var csvStream = format({ delimiter: ',', headers: ['catalogNumber', 'recordedBy', 'scientificName', 'family', 'institutionCode', 'continent', 'country', 'stateProvince', 'county', 'municipality', 'locality'] });
 
@@ -1440,7 +1440,7 @@ app.get('/exportar/csv', (req, res) => {
 // ===============================================================
 // Exportar RDF/XML
 // ===============================================================
-app.get('/exportar/rdf', (req, res) => {
+app.get('/exportar/rdf', mdAutenticacion.verificaToken, (req, res) => {
     var options = {
         mode: 'text',
         pythonPath: 'C:/Python27/python.exe',

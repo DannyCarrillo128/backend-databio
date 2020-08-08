@@ -2,6 +2,7 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
+var env = require('dotenv').config({ path: 'variables.env' });
 
 // Inicializar Variables
 var app = express();
@@ -34,15 +35,18 @@ var exportacionesRoutes = require('./routes/exportaciones');
 var mailerRoutes = require('./routes/mailer');
 
 // Conexión a la Base de Datos
-mongoose.connection.openUri('mongodb://localhost:27017/databioDB', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }, (err, res) => {
+mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }, (err, res) => {
     if (err) throw err;
     console.log('Base de Datos: \x1b[32m%s\x1b[0m', 'online');
 });
 
-// Server index config
-/* var serveIndex = require('serve-index');
-app.use(express.static(__dirname + '/'))
-app.use('/uploads', serveIndex(__dirname + '/uploads')); */
+/* mongoose.connection.openUri('mongodb://localhost:27017/databioDB', { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }, (err, res) => {
+    if (err) throw err;
+    console.log('Base de Datos: \x1b[32m%s\x1b[0m', 'online');
+}); */
+
+// Directorio público
+app.use(express.static('public'));
 
 // Rutas
 app.use('/darwinCore', darwinCoreRoutes);
@@ -59,7 +63,18 @@ app.use('/export', exportacionesRoutes);
 app.use('/enviar', mailerRoutes);
 app.use('/', appRoutes);
 
-// Escuchar Peticiones
-app.listen(3000, () => {
-    console.log('Express Server puerto 3000: \x1b[32m%s\x1b[0m', 'online');
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'public/index.html'));
 });
+
+// Escuchar Peticiones
+const host = process.env.HOST || '0.0.0.0';
+const port = process.env.PORT || 3000;
+
+app.listen(port, host, () => {
+    console.log('Express Server puerto ' + port + ': \x1b[32m%s\x1b[0m', 'online');
+});
+
+/* app.listen(3000, () => {
+    console.log('Express Server puerto 3000: \x1b[32m%s\x1b[0m', 'online');
+}); */
