@@ -68,8 +68,10 @@ app.get('*', (req, res) => {
 });
 
 // Escuchar Peticiones
-const host = process.env.HOST || '0.0.0.0';
-const port = process.env.PORT || 3000;
+//const host = process.env.HOST || '0.0.0.0';
+//const port = process.env.PORT || 3000;
+const host = '127.0.0.1';
+const port = 3000;
 
 app.listen(port, host, () => {
     console.log('Express Server puerto ' + port + ': \x1b[32m%s\x1b[0m', 'online');
