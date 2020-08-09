@@ -9,7 +9,7 @@ var nodemailer = require("nodemailer");
 // ===============================================================
 app.post('/solicitud', (req, res) => {
     var body = req.body;
-    var url = 'https://databioapp.herokuapp.com/login';
+    var url = 'https://databioapp.herokuapp.com/#/solicitudes';
 
     var transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
@@ -79,7 +79,7 @@ app.post('/solicitud', (req, res) => {
 // ===============================================================
 app.post('/confirmacion', (req, res) => {
     var body = req.body;
-    var url = 'https://databioapp.herokuapp.com/login';
+    var url = 'https://databioapp.herokuapp.com/#/login';
 
     var transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
