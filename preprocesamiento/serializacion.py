@@ -16,7 +16,7 @@ skos = Namespace('http://www.w3.org/2004/02/skos/core#')
 UMBEL = Namespace('http://umbel.org/umbel#')
 
 # Dataset
-coleccion = Namespace('http://localhost:3000/databio/herbario/')
+coleccion = Namespace('http://fuseki.databio.com.co:3030/databio')
 
 # Datasets
 uniprot = Namespace('http://www.uniprot.org/taxonomy/')
