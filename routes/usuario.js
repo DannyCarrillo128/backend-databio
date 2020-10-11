@@ -1,5 +1,7 @@
 var express = require('express');
 var bcrypt = require('bcryptjs');
+var crypto = require('crypto-js');
+var randomPassword = require('secure-random-password');
 
 var mdAutenticacion = require('../middlewares/autenticacion');
 
@@ -68,6 +70,115 @@ app.get('/:id', (req, res) => {
             });
         });
 });
+
+
+// ===============================================================
+// Recuperar Contraseña
+// ===============================================================
+app.put('/recuperar', (req, res) => {
+    var body = req.body.email;
+    var newPassword = randomPassword.randomString({ length: 10 });
+
+    Usuario.findOne({ email: body }, (err, usuario) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error cargando Usuario',
+                errors: err
+            });
+        }
+
+        if (!usuario) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'No existe un usuario con ese email.',
+                errors: { message: 'No existe un usuario con ese email.' }
+            });
+        }
+
+        if (usuario.google) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Este usuario se ha autenticado a través de Google.',
+                errors: { message: 'Este usuario se ha autenticado a través de Google.' }
+            });
+        }
+
+        usuario.password = bcrypt.hashSync(newPassword, 10);
+
+        usuario.save((err, usuarioGuardado) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar Usuario',
+                    errors: err
+                });
+            }
+
+            res.status(200).json({
+                ok: true,
+                usuario: usuarioGuardado.nombre,
+                password: crypto.AES.encrypt(newPassword.trim(), "oW8gfd42rr4a6H").toString()
+            });
+        });
+    });
+});
+
+
+// ===============================================================
+// Actualizar Contraseña
+// ===============================================================
+app.put('/password/:id', [mdAutenticacion.verificaToken, mdAutenticacion.verificaRolUsuario, mdAutenticacion.verificaAutenticacion], (req, res) => {
+    var id = req.params.id;
+    var body = req.body;
+
+    Usuario.findById(id, (err, usuario) => {
+        if (err) {
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar Usuario',
+                errors: err
+            });
+        }
+
+        if (!usuario) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'El Usuario con el ID ' + id + ' no existe',
+                errors: { message: 'No existe un Usuario con ese ID' }
+            });
+        }
+
+        if (!bcrypt.compareSync(body.password, usuario.password)) {
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'La contraseña es incorrecta.',
+                errors: { message: 'La contraseña es incorrecta.' }
+            });
+        }
+
+        usuario.password = bcrypt.hashSync(body.newPassword, 10);
+
+        usuario.save((err, usuarioGuardado) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Error al actualizar Usuario',
+                    errors: err
+                });
+            }
+
+            usuarioGuardado.password = ':D';
+
+            res.status(200).json({
+                ok: true,
+                mensaje: 'Contraseña actualizada',
+                usuario: usuarioGuardado
+            });
+        });
+    });
+});
+
 
 // ===============================================================
 // Actualizar Usuario

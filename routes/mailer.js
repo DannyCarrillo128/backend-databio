@@ -17,7 +17,7 @@ app.post('/solicitud', (req, res) => {
         secure: false,
         auth: {
             user: 'databioapp@gmail.com',
-            pass: 'databioapp106'
+            pass: 'jardinbotanico123'
         },
         tls: {
             rejectUnauthorized: false
@@ -55,7 +55,7 @@ app.post('/solicitud', (req, res) => {
                         </td>
                     </tr>
                     <tr>
-                        <td align="center"><a style="text-decoration: none; padding: 13px 20px 13px 20px; background: #669104; font-size: 17px; font-family: Calibri; border-radius: 6px; color: white;" href="${ url }">Continuar</a></td>
+                        <td align="center"><a style="text-decoration: none; padding: 13px 20px 13px 20px; background: #669104; font-size: 17px; font-family: Calibri; border-radius: 6px; color: white;" href="${ url }"><strong>CONTINUAR</strong></a></td>
                     </tr>
 		        </tbody>
 	        </table>
@@ -87,7 +87,7 @@ app.post('/confirmacion', (req, res) => {
         secure: false,
         auth: {
             user: 'databioapp@gmail.com',
-            pass: 'databioapp106'
+            pass: 'jardinbotanico123'
         },
         tls: {
             rejectUnauthorized: false
@@ -112,7 +112,66 @@ app.post('/confirmacion', (req, res) => {
                         <td align="justify" style="padding: 0px 30px 30px;"><p style="font-family: Calibri; font-size: 17px;">Hola ${ req.body.nombre } te damos la bienvenida a Databio, una plataforma en la que podrás<br>consultar los especímenes vegetales recolectados por el Jardín Botánico Juan María Céspedes.<br><br>Gracias por crear una cuenta.</p></td>
                     </tr>
                     <tr>
-                        <td align="center"><a style="text-decoration: none; padding: 13px 20px 13px 20px; background: #669104; font-size: 17px; font-family: Calibri; border-radius: 6px; color: white;" href="${ url }">Continuar</a></td>
+                        <td align="center"><a style="text-decoration: none; padding: 13px 20px 13px 20px; background: #669104; font-size: 17px; font-family: Calibri; border-radius: 6px; color: white;" href="${ url }"><strong>CONTINUAR</strong></a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        `,
+        attachments: [{
+            path: './assets/big-logo.png',
+            cid: 'logo'
+        }]
+    });
+
+    res.status(200).json({
+        ok: true,
+        mensaje: 'Email enviado exitosamente'
+    });
+});
+
+
+// ===============================================================
+// Enviar Nueva Contraseña
+// ===============================================================
+app.post('/password', (req, res) => {
+    var url = 'https://databio.com.co/#/login';
+
+    var transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        auth: {
+            user: 'databioapp@gmail.com',
+            pass: 'jardinbotanico123'
+        },
+        tls: {
+            rejectUnauthorized: false
+        }
+    });
+
+    transporter.sendMail({
+        from: 'databioapp@gmail.com',
+        to: req.body.email,
+        subject: 'Recuperación de Contraseña',
+        html: `
+        <div style="background-color: #f4f6f9; padding: 25px;">
+            <table style="margin-left: auto; margin-right: auto;">
+                <tbody>
+                    <tr>
+                        <td align="center"><img width="300px" src="cid:logo"></td>
+                    </tr>
+                    <tr>
+                        <td align="center"><h1 style="font-family: Calibri;">Recuperación de Contraseña</h1></td>
+                    </tr>
+                    <tr>
+                        <td align="justify" style="padding: 0px 30px 30px;"><p style="font-family: Calibri; font-size: 17px;">Hola ${ req.body.nombre },<br><br>Parece que has olvidado tu contraseña. Es por ello que te hemos asignado una nueva.<br><br>La contraseña es: ${ req.body.password }<br><br>Por motivos de seguridad te recomendamos que la modifiques lo más pronto posible.<br><br>Gracias.</p></td>
+                    </tr>
+                    <tr>
+                        <td align="justify" style="padding: 0px 30px 30px;"><p style="font-family: Calibri; font-size: 17px;"></p></td>
+                    </tr>
+                    <tr>
+                        <td align="center"><a style="text-decoration: none; padding: 13px 20px 13px 20px; background: #669104; font-size: 17px; font-family: Calibri; border-radius: 6px; color: white;" href="${ url }"><strong>CONTINUAR</strong></a></td>
                     </tr>
                 </tbody>
             </table>

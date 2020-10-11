@@ -59,3 +59,22 @@ exports.verificaRolUsuario = function(req, res, next) {
         });
     }
 };
+
+
+// ===============================================================
+// Verificar Autenticación
+// ===============================================================
+exports.verificaAutenticacion = function(req, res, next) {
+    var usuario = req.usuario;
+
+    if (!usuario.google) {
+        next();
+        return;
+    } else {
+        return res.status(401).json({
+            ok: false,
+            mensaje: 'Permiso denegado',
+            errors: { message: 'Permiso denegado' }
+        });
+    }
+};

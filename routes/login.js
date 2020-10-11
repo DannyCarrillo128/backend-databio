@@ -115,7 +115,8 @@ app.post('/google', async(req, res) => {
             if (!usuarioDB.google) {
                 return res.status(400).json({
                     ok: false,
-                    mensaje: 'Se debe utilizar la autenticación normal'
+                    mensaje: 'Se debe utilizar la autenticación normal',
+                    errors: { message: 'El usuario con el que intentaste ingresar tiene autenticación normal. Ingresa mediante el formulario.' }
                 });
             }
 
@@ -123,7 +124,7 @@ app.post('/google', async(req, res) => {
                 return res.status(401).json({
                     ok: false,
                     mensaje: 'Acceso restringido',
-                    errors: err
+                    errors: { message: 'El usuario con el que intentaste ingresar aún no está verificado o está inactivo.' }
                 });
             } else {
                 var token = jwt.sign({ usuario: usuarioDB }, SEED, { expiresIn: 14400 }); // 4 horas
